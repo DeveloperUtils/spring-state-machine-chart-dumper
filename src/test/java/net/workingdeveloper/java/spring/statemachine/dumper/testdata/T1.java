@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.StateMachineBuilder;
 
 import java.util.EnumSet;
@@ -42,7 +44,12 @@ public class T1 {
         builder.configureStates()
                .withStates()
                .initial(States.SI)
-               .state(States.S1)
+               .state(States.S1, new Action<States, Events>() {
+                   @Override
+                   public void execute(StateContext<States, Events> context) {
+                       System.out.print("test");
+                   }
+               }, null)
                .states(EnumSet.allOf(States.class))
         ;
 

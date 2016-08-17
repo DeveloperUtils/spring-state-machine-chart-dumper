@@ -1,6 +1,7 @@
 package net.workingdeveloper.java.spring.statemachine.dumper;
 
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.region.Region;
 import org.springframework.statemachine.state.AbstractState;
 import org.springframework.statemachine.state.RegionState;
@@ -123,11 +124,32 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
                 }
                 if (lState.isOrthogonal()) {
                 }
-
             }
         }
         processTransitions(lXml, lState);
+        processActions(lXml, lState);
         return lXml;
+    }
+
+    private void processActions(Element aXml, State<S, E> aLState) {
+        if (aLState.getEntryActions() != null) {
+            for (Action<S, E> lAction : aLState.getEntryActions()) {
+                Element lOnentry = createElement("onentry");
+                Element lRaise   = createElement("raise");
+                lRaise.setAttribute("event", lAction.toString());
+                lOnentry.appendChild(lRaise);
+                aXml.appendChild(lOnentry);
+            }
+        }
+        if (aLState.getExitActions() != null) {
+            for (Action<S, E> lAction : aLState.getExitActions()) {
+                Element lOnentry = createElement("onexit");
+                Element lRaise   = createElement("raise");
+                lRaise.setAttribute("event", lAction.toString());
+                lOnentry.appendChild(lRaise);
+                aXml.appendChild(lOnentry);
+            }
+        }
     }
 
     private void processRegionState(Element aXml, RegionState<S, E> aRegionState) {
@@ -135,6 +157,7 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
         lRegionRootXml.setAttribute("id", aRegionState.getId().toString());
         aXml.appendChild(lRegionRootXml);
         int regCount = 0;
+
         for (Region<S, E> lRegion : aRegionState.getRegions()) {
             Element lRegionXml = createElement("state");
             lRegionXml.setAttribute("id", aRegionState.getId().toString() + "r" + regCount);
@@ -143,11 +166,11 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
             processStates(lRegionXml, lStates);
             Collection<Transition<S, E>> lTransitions = lRegion.getTransitions();
             for (Transition<S, E> lTransition : lTransitions) {
-                    Element lXml = createElement("transition");
-                    aXml.appendChild(lXml);
+                Element lXml = createElement("transition");
+                aXml.appendChild(lXml);
 
-                    lXml.setAttribute("event", lTransition.getTrigger().getEvent().toString());
-                    lXml.setAttribute("target", lTransition.getTarget().getId().toString());
+                lXml.setAttribute("event", lTransition.getTrigger().getEvent().toString());
+                lXml.setAttribute("target", lTransition.getTarget().getId().toString());
             }
             regCount++;
         }
