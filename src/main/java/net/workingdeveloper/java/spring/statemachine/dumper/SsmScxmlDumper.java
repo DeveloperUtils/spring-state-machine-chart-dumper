@@ -1,7 +1,9 @@
 package net.workingdeveloper.java.spring.statemachine.dumper;
 
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.region.Region;
 import org.springframework.statemachine.state.AbstractState;
+import org.springframework.statemachine.state.RegionState;
 import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Service;
@@ -75,7 +77,7 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
     }
 
     private Element processState(Element aRoot, State<S, E> lState) {
-        Element lXml = null;
+        Element lXml;
         if (lState.getPseudoState() != null) {
             switch (lState.getPseudoState().getKind()) {
                 case END:
@@ -116,8 +118,10 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
                 }
             }
             if (lState.isComposite()) {
+                if (lState instanceof RegionState) {
+                    processRegionState(lXml, ((RegionState<S, E>) lState));
+                }
                 if (lState.isOrthogonal()) {
-
                 }
 
             }
@@ -126,8 +130,30 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
         return lXml;
     }
 
-    private void processSubMachine(Element aXml, StateMachine<S, E> aStateMachine) {
+    private void processRegionState(Element aXml, RegionState<S, E> aRegionState) {
+        Element lRegionRootXml = createElement("parallel");
+        lRegionRootXml.setAttribute("id", aRegionState.getId().toString());
+        aXml.appendChild(lRegionRootXml);
+        int regCount = 0;
+        for (Region<S, E> lRegion : aRegionState.getRegions()) {
+            Element lRegionXml = createElement("state");
+            lRegionXml.setAttribute("id", aRegionState.getId().toString() + "r" + regCount);
+            lRegionRootXml.appendChild(lRegionXml);
+            Collection<State<S, E>> lStates = lRegion.getStates();
+            processStates(lRegionXml, lStates);
+            Collection<Transition<S, E>> lTransitions = lRegion.getTransitions();
+            for (Transition<S, E> lTransition : lTransitions) {
+                    Element lXml = createElement("transition");
+                    aXml.appendChild(lXml);
 
+                    lXml.setAttribute("event", lTransition.getTrigger().getEvent().toString());
+                    lXml.setAttribute("target", lTransition.getTarget().getId().toString());
+            }
+            regCount++;
+        }
+    }
+
+    private void processSubMachine(Element aXml, StateMachine<S, E> aStateMachine) {
         Collection<State<S, E>> lStates = aStateMachine.getStates();
         if (aStateMachine.getInitialState() != null) {
             aXml.setAttribute("initial", aStateMachine.getInitialState().getId().toString());
@@ -146,8 +172,7 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
     private void processTransitions(Element aXml, State<S, E> aState) {
         Collection<Transition<S, E>> lTransitions = fStateMachine.getTransitions();
         for (Transition<S, E> lTransition : lTransitions) {
-            if (aState.equals(lTransition.getSource())
-                    ) {
+            if (aState.equals(lTransition.getSource())) {
                 Element lXml = createElement("transition");
                 aXml.appendChild(lXml);
 

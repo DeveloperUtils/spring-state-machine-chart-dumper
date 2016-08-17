@@ -74,4 +74,33 @@ public class SsmScxmlDumperTest extends AbstractStateMachineTests {
 
     }
 
+    @Test
+    public void dumpRegion() throws Exception {
+        SsmScxmlDumper<SMHierarch1.States, SMHierarch1.Events> sut = new SsmScxmlDumper<>(
+                fApplicationContext.getBean(SMHierarch1.class).buildRegionMachine()
+        );
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder        docBuilder = docFactory.newDocumentBuilder();
+
+        // root elements
+        Document lDocument = docBuilder.newDocument();
+        sut.dump(lDocument);
+        System.out.println(sut.asString());
+        NodeList        lX     = lDocument.getDocumentElement().getElementsByTagName("state");
+        HashSet<String> lIdMap = new HashSet<>();
+        for (int i = 0; i < lX.getLength(); i++) {
+            String lId = ((Element) lX.item(i)).getAttribute("id");
+            assertThat(lIdMap, not(hasItem(lId)));
+            lIdMap.add(lId);
+        }
+        assertThat(
+                lIdMap,
+                containsInAnyOrder(
+                        SMHierarch1.States.S1.toString(), SMHierarch1.States.S21.toString(),
+                        SMHierarch1.States.S2.toString(), SMHierarch1.States.S2F.toString(),
+                        SMHierarch1.States.S3I.toString(), SMHierarch1.States.S31.toString(),
+                        SMHierarch1.States.S3F.toString()
+                )
+        );
+    }
 }
