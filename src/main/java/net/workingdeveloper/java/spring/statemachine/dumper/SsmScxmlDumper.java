@@ -13,14 +13,23 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Christoph Graupner on 8/16/16.
@@ -57,6 +66,20 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
         return getXmlDocument().createComment(data);
     }
 
+    public SsmScxmlDumper dump() {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder        docBuilder = null;
+        try {
+            docBuilder = docFactory.newDocumentBuilder();
+            // root elements
+            Document lDocument = docBuilder.newDocument();
+            dump(lDocument);
+        } catch (ParserConfigurationException aE) {
+            aE.printStackTrace();
+        }
+        return this;
+    }
+
     public SsmScxmlDumper dump(Document aOutputDocument) {
         fXmlDocument = aOutputDocument;
         Element lScxmlRoot = aOutputDocument.createElement("scxml");
@@ -67,6 +90,11 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
         processSubMachine(lScxmlRoot, fStateMachine);
 
         return this;
+    }
+
+    public void toFile(File aFile) throws TransformerException, IOException {
+        List<String> lList = Arrays.asList(dump().asString());
+        Files.write(aFile.toPath(), lList, Charset.forName("UTF-8"));
     }
 
     protected Element createElement(String aS) throws DOMException {
