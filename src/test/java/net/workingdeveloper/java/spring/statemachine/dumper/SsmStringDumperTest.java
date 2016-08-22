@@ -38,7 +38,7 @@ public class SsmStringDumperTest {
                 fApplicationContext.getBean(SMHierarch1.class).buildMachine()
         );
 
-        String ret = sut.dump();
+        String ret = sut.dump().asString();
         System.out.println(ret);
         assertThat(ret, is(not(emptyOrNullString())));
     }
@@ -49,7 +49,7 @@ public class SsmStringDumperTest {
                 fApplicationContext.getBean(T1.class).buildMachine()
         );
 
-        String ret = sut.dump();
+        String ret = sut.dump().asString();
         System.out.println(ret);
         assertThat(ret, is(not(emptyOrNullString())));
     }

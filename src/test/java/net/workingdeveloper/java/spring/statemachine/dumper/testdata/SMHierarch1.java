@@ -3,6 +3,7 @@ package net.workingdeveloper.java.spring.statemachine.dumper.testdata;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineBuilder;
+import org.springframework.statemachine.uml.UmlStateMachineModelFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,6 +21,19 @@ public class SMHierarch1 {
     public enum Events {
         E_S1_SE, E_S1_1__S1_2, E_S1_S1, E_S1_S2, E_SI_S1
 
+    }
+
+    public StateMachine<String, String> buildUmlMachine(String aPath) throws Exception {
+        StateMachineBuilder.Builder<String, String> builder = StateMachineBuilder.builder();
+
+        builder.configureModel().withModel().factory(new UmlStateMachineModelFactory(
+                aPath
+        ));
+        builder.configureConfiguration()
+               .withConfiguration()
+               .taskExecutor(new SyncTaskExecutor())
+        ;
+        return builder.build();
     }
 
     public StateMachine<SMHierarch1.States, SMHierarch1.Events> buildMachine() throws Exception {

@@ -8,28 +8,10 @@ import org.springframework.statemachine.state.RegionState;
 import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Comment;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by Christoph Graupner on 8/16/16.
@@ -37,51 +19,16 @@ import java.util.List;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 @Service
-public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
-
-    private Document fXmlDocument;
+public class SsmScxmlDumper<S, E> extends SsmXmlDumper<S, E> {
 
     public SsmScxmlDumper(StateMachine<S, E> aStateMachine) {
         super(aStateMachine);
     }
 
-    public String asString() throws TransformerException {
-        TransformerFactory tf          = TransformerFactory.newInstance();
-        Transformer        transformer = tf.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
-        StringWriter lWriter = new StringWriter();
-        transformer.transform(
-                new DOMSource(getXmlDocument()),
-                new StreamResult(lWriter)
-        );
-        return lWriter.toString();
-    }
-
-    public Comment createComment(String data) {
-        return getXmlDocument().createComment(data);
-    }
-
-    public SsmScxmlDumper dump() {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder        docBuilder = null;
-        try {
-            docBuilder = docFactory.newDocumentBuilder();
-            // root elements
-            Document lDocument = docBuilder.newDocument();
-            dump(lDocument);
-        } catch (ParserConfigurationException aE) {
-            aE.printStackTrace();
-        }
-        return this;
-    }
-
-    public SsmScxmlDumper dump(Document aOutputDocument) {
-        fXmlDocument = aOutputDocument;
+    @Override
+    public <T extends SsmXmlDumper<S, E>> T dump(Document aOutputDocument) {
+        setXmlDocument(aOutputDocument);
         Element lScxmlRoot = aOutputDocument.createElement("scxml");
         aOutputDocument.appendChild(lScxmlRoot);
         lScxmlRoot.setAttribute("version", "1.0");
@@ -89,20 +36,7 @@ public class SsmScxmlDumper<S, E> extends SsmDumper<S, E> {
 
         processSubMachine(lScxmlRoot, fStateMachine);
 
-        return this;
-    }
-
-    public void toFile(File aFile) throws TransformerException, IOException {
-        List<String> lList = Arrays.asList(dump().asString());
-        Files.write(aFile.toPath(), lList, Charset.forName("UTF-8"));
-    }
-
-    protected Element createElement(String aS) throws DOMException {
-        return getXmlDocument().createElement(aS);
-    }
-
-    protected Document getXmlDocument() {
-        return fXmlDocument;
+        return (T) this;
     }
 
     private Element processState(Element aRoot, State<S, E> lState) {

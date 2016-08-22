@@ -14,4 +14,12 @@ abstract public class SsmDumper<S, E> {
     public SsmDumper(StateMachine<S, E> aStateMachine) {
         fStateMachine = aStateMachine;
     }
+
+    abstract public String asString();
+
+    abstract public <T extends SsmDumper> T dump();
+
+    public StateMachine<S, E> getStateMachine() {
+        return fStateMachine;
+    }
 }

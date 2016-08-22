@@ -14,15 +14,23 @@ import java.util.Collection;
 @Service
 public class SsmStringDumper<S, E> extends SsmDumper<S, E> {
 
+    private String fResult;
+
     public SsmStringDumper(StateMachine<S, E> aStateMachine) {
         super(aStateMachine);
     }
 
-    public String dump() {
+    @Override
+    public String asString() {
+        return fResult;
+    }
+
+    @Override
+    public <T extends SsmDumper> T dump() {
         Collection<State<S, E>> lStates =
                 fStateMachine.getStates();
-        String ret = processStates(lStates);
-        return ret;
+        fResult = processStates(lStates);
+        return (T) this;
     }
 
     private String processStates(Collection<State<S, E>> aStates) {
