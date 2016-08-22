@@ -2,6 +2,8 @@ package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.um
 
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
 
+import java.util.UUID;
+
 /**
  * Created by Christoph Graupner on 8/21/16.
  *
@@ -11,12 +13,22 @@ public class PapyrusModel implements IPapyrusModel {
     public class StateMachine extends RegionState implements IPMStateMachine {
 
         @Override
-        public IPMRegionState addRegion(String aName) {
+        public IPMRegionState addRegion(UUID aUUID, String aName) {
             return null;
         }
     }
 
     public class State implements IPMState {
+
+        @Override
+        public String getId() {
+            return null;
+        }
+
+        @Override
+        public UUID getUuid() {
+            return null;
+        }
 
         public void setType(String aType) {
 
@@ -26,22 +38,27 @@ public class PapyrusModel implements IPapyrusModel {
 
     public class RegionState extends State implements IPMRegionState {
         @Override
-        public IPMPseudoState addPseudoState(String aName, UmlType aFinalstate) {
+        public IPMPseudoState addPseudoState(UUID aUUID, String aName, UmlType aFinalstate) {
             return null;
         }
 
         @Override
-        public IPMPseudoState addPseudoState(String aName, PseudoKind aDeepHistory) {
+        public IPMPseudoState addPseudoState(UUID aUUID, String aName, PseudoKind aDeepHistory) {
             return null;
         }
 
         @Override
-        public IPMState addState(String aS) {
+        public IPMState addState(UUID aUUID, String aS) {
             return null;
         }
 
         @Override
-        public IPMStateMachine addSubMachine(String aId) {
+        public IPMStateMachine addSubMachine(UUID aUUID, String aId) {
+            return null;
+        }
+
+        @Override
+        public IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState) {
             return null;
         }
 
@@ -76,6 +93,11 @@ public class PapyrusModel implements IPapyrusModel {
 
     @Override
     public String asString() {
+        return null;
+    }
+
+    @Override
+    public IPMState find(UUID aSource) {
         return null;
     }
 

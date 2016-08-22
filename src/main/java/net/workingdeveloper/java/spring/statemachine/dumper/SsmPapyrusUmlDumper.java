@@ -12,6 +12,9 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by Christoph Graupner on 8/20/16.
@@ -20,6 +23,7 @@ import java.util.Collection;
  */
 public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
     IPapyrusModel fModel;
+    Map<String, UUID> fUUIDMap = new HashMap<>();
 
     public SsmPapyrusUmlDumper(StateMachine<S, E> aStateMachine) {
         super(aStateMachine);
@@ -47,7 +51,7 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
 
     private void processMachine(IPapyrusModel aSM, StateMachine<S, E> aStateMachine) {
         IPapyrusModel.IPMStateMachine lStateMachine = aSM.getRootState(getStateMachine().getId());
-        IPapyrusModel.IPMRegionState  lRootRegion   = lStateMachine.addRegion("Root");
+        IPapyrusModel.IPMRegionState  lRootRegion   = lStateMachine.addRegion(aStateMachine.getUuid(), "Root");
         processMachine(lRootRegion, aStateMachine);
     }
 
@@ -71,52 +75,73 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
                 switch (aStateSsm.getPseudoState().getKind()) {
                     case END:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.UmlType.FINALSTATE);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.UmlType.FINALSTATE
+                        );
                         break;
                     case HISTORY_SHALLOW:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.SHALLOW_HISTORY);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.SHALLOW_HISTORY
+                        );
                         break;
                     case HISTORY_DEEP:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.DEEP_HISTORY);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.DEEP_HISTORY
+                        );
                         break;
                     case FORK:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.FORK);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.FORK
+                        );
                         break;
                     case INITIAL:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.INITIAL);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.INITIAL
+                        );
                         break;
                     case CHOICE:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.CHOICE);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.CHOICE
+                        );
                         break;
                     case JUNCTION:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.JUNCTION);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.JUNCTION
+                        );
                         break;
                     case JOIN:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.JOIN);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.JOIN
+                        );
                         break;
                     case ENTRY:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.ENTRY_POINT);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.ENTRY_POINT
+                        );
                         break;
                     case EXIT:
                         lStatePM = aParentState.addPseudoState(
-                                aStateSsm.getId().toString(), IPapyrusModel.PseudoKind.EXIT_POINT);
+                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                                IPapyrusModel.PseudoKind.EXIT_POINT
+                        );
                         break;
                 }
             } else {
-                lStatePM = aParentState.addState(aStateSsm.getId().toString());
+                lStatePM = aParentState.addState(
+                        uuidFromState(aStateSsm), aStateSsm.getId().toString());
             }
         } else {
             if (aStateSsm.isSubmachineState()) {
                 if (aStateSsm instanceof AbstractState) {
-                    lStatePM = aParentState.addSubMachine("");
+                    lStatePM = aParentState.addSubMachine(uuidFromState(aStateSsm), "");
                     processMachine(
                             (IPapyrusModel.IPMStateMachine) lStatePM,
                             ((AbstractState<S, E>) aStateSsm).getSubmachine()
@@ -124,7 +149,8 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
                 }
             } else if (aStateSsm.isComposite()) {
                 if (aStateSsm instanceof RegionState) {
-                    lStatePM = aParentState.addSubMachine(aStateSsm.getId().toString());
+                    lStatePM = aParentState.addSubMachine(
+                            uuidFromState(aStateSsm), aStateSsm.getId().toString());
                     processRegionState((IPapyrusModel.IPMStateMachine) lStatePM, ((RegionState<S, E>) aStateSsm));
                 }
 //                if (aStateSsm.isOrthogonal()) {
@@ -142,19 +168,31 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
     private void processTransitions(IPapyrusModel.IPMRegionState aParentRegionPM, Region<S, E> aRegion) {
         Collection<Transition<S, E>> lTransitions = aRegion.getTransitions();
         for (Transition<S, E> lTransition : lTransitions) {
+            aParentRegionPM.addTransition(
+                    fModel.find(uuidFromState(lTransition.getSource())),
+                    fModel.find(uuidFromState(lTransition.getTarget()))
+            );
         }
     }
 
     private void processRegionState(IPapyrusModel.IPMStateMachine aXml, RegionState<S, E> aRegionState) {
         int regCount = 0;
         for (Region<S, E> lRegion : aRegionState.getRegions()) {
-            IPapyrusModel.IPMRegionState lRegionPM = aXml.addRegion(aRegionState.getId().toString() + "r" + regCount);
-            Collection<State<S, E>>      lStates   = lRegion.getStates();
+            IPapyrusModel.IPMRegionState lRegionPM = aXml.addRegion(uuidFromState(aRegionState), aRegionState.
+                                                                                                                     getId()
+                                                                                                             .toString() + "r" + regCount);
+            Collection<State<S, E>> lStates = lRegion.getStates();
             for (State<S, E> lState : lStates) {
                 processState(lRegionPM, lState);
             }
             processTransitions(lRegionPM, lRegion);
             regCount++;
         }
+    }
+
+    private UUID uuidFromState(State<S, E> aId) {
+        if (!fUUIDMap.containsKey(aId.toString()))
+            fUUIDMap.put(aId.toString(), UUID.randomUUID());
+        return fUUIDMap.get(aId.toString());
     }
 }

@@ -1,5 +1,7 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml;
 
+import java.util.UUID;
+
 /**
  * Created by Christoph Graupner on 8/22/16.
  *
@@ -19,17 +21,22 @@ public interface IPapyrusModel {
 
     interface IPMState {
 
+        String getId();
+
+        UUID getUuid();
     }
 
     interface IPMRegionState extends IPMState {
 
-        IPMPseudoState addPseudoState(String aName, UmlType aFinalstate);
+        IPMPseudoState addPseudoState(UUID aUUID, String aName, UmlType aFinalstate);
 
-        IPMPseudoState addPseudoState(String aName, PseudoKind aDeepHistory);
+        IPMPseudoState addPseudoState(UUID aUUID, String aName, PseudoKind aDeepHistory);
 
-        IPMState addState(String aS);
+        IPMState addState(UUID aUUID, String aS);
 
-        IPMStateMachine addSubMachine(String aId);
+        IPMStateMachine addSubMachine(UUID aUUID, String aId);
+
+        IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState);
 
         IPMRegionState setName(String aId);
     }
@@ -66,14 +73,18 @@ public interface IPapyrusModel {
     }
 
     interface IPMStateMachine extends IPMRegionState {
-        IPMRegionState addRegion(String aName);
+        IPMRegionState addRegion(UUID aUUID, String aName);
     }
 
     interface IPMTransition {
+        IPMTransition setSource(IPMState aState);
 
+        IPMTransition setTarget(IPMState aTarget);
     }
 
     String asString();
+
+    IPMState find(UUID aSource);
 
     IPMStateMachine getRootState(String aString);
 

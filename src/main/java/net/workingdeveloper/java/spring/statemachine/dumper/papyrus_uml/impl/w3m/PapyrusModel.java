@@ -3,6 +3,8 @@ package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Created by Christoph Graupner on 8/22/16.
@@ -12,15 +14,15 @@ import javax.xml.parsers.ParserConfigurationException;
 public class PapyrusModel implements IPapyrusModel {
     public class StateMachine extends RegionState implements IPMStateMachine {
 
-
         public StateMachine(ModelUml.RegionState aUmlState, ModelNotation.State aNotationState, RegionState aParent) {
             super(aUmlState, aNotationState, aParent);
         }
 
         @Override
-        public IPMRegionState addRegion(String aName) {
-            return new RegionState(fUmlState.addRegionState(aName), null, this);
+        public IPMRegionState addRegion(UUID aUUID, String aName) {
+            return new RegionState(fUmlState.addRegionState(aUUID, aName), null, this);
         }
+
     }
 
     public class State<UMLMODEL extends ModelUml.State, NOTATIONMODEL extends ModelNotation.State, PARENT extends State> {
@@ -32,6 +34,15 @@ public class PapyrusModel implements IPapyrusModel {
             fUmlState = aUmlState;
             fNotationState = aNotationState;
             fParent = aParent;
+            fStateMap.put(aUmlState.getUuid(), this);
+        }
+
+        public String getId() {
+            return fUmlState.getId();
+        }
+
+        public UUID getUuid() {
+            return fUmlState.getUuid();
         }
     }
 
@@ -53,11 +64,11 @@ public class PapyrusModel implements IPapyrusModel {
         }
 
         @Override
-        public IPMPseudoState addPseudoState(String aName, UmlType aFinalstate) {
+        public IPMPseudoState addPseudoState(UUID aUUID, String aName, UmlType aFinalstate) {
             switch (aFinalstate) {
 
                 case FINALSTATE:
-                    return new PseudoState(fUmlState.addPseudoState(PseudoKind.FINAL, aName), null, this);
+                    return new PseudoState(fUmlState.addPseudoState(PseudoKind.FINAL, aUUID, aName), null, this);
                 case PSEUDO_STATE:
                     break;
                 case STATE:
@@ -67,24 +78,61 @@ public class PapyrusModel implements IPapyrusModel {
         }
 
         @Override
-        public IPMPseudoState addPseudoState(String aName, PseudoKind aKind) {
-            return new PseudoState(fUmlState.addPseudoState(aKind, aName), null, this);
+        public IPMPseudoState addPseudoState(UUID aUUID, String aName, PseudoKind aKind) {
+            return new PseudoState(fUmlState.addPseudoState(aKind, aUUID, aName), null, this);
         }
 
         @Override
-        public IPMState addState(String aS) {
-            return new SimpleState(fUmlState.addState(aS), null, this);
+        public IPMState addState(UUID aUUID, String aS) {
+            return new SimpleState(fUmlState.addState(aUUID, aS), null, this);
         }
 
 
         @Override
-        public IPMStateMachine addSubMachine(String aS) {
-            return new StateMachine(fUmlState.addSubMachine(aS), null, this);
+        public IPMStateMachine addSubMachine(UUID aUUID, String aS) {
+            return new StateMachine(fUmlState.addSubMachine(aUUID, aS), null, this);
         }
 
         @Override
-        public IPMRegionState setName(String aId) {
-            fUmlState.setName(aId);
+        public IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState) {
+
+            IPMTransition lTransition = new Transaction(
+                    this,
+                    fUmlState.addTransition(
+                            aSourceState.getUuid(),
+                            aTargetState.getUuid()
+                    )
+            );
+
+
+            return lTransition;
+        }
+
+        @Override
+        public IPMRegionState setName(String aName) {
+            fUmlState.setName(aName);
+            return this;
+        }
+    }
+
+    class Transaction implements IPMTransition {
+        IPMRegionState      fParent;
+        ModelUml.Transition fTransition;
+
+        public Transaction(IPMRegionState aParent, ModelUml.Transition aTransition) {
+            fParent = aParent;
+            fTransition = aTransition;
+        }
+
+        @Override
+        public IPMTransition setSource(IPMState aState) {
+            fTransition.setSource(aState.getId());
+            return this;
+        }
+
+        @Override
+        public IPMTransition setTarget(IPMState aTarget) {
+            fTransition.setTarget(aTarget.getId());
             return this;
         }
     }
@@ -106,7 +154,8 @@ public class PapyrusModel implements IPapyrusModel {
 
     ModelDi       fDi;
     ModelNotation fNotation;
-    ModelUml      fUml;
+    HashMap<UUID, State> fStateMap = new HashMap<>();
+    ModelUml fUml;
     private StateMachine fRootState;
 
     public PapyrusModel() throws ParserConfigurationException {
@@ -121,9 +170,15 @@ public class PapyrusModel implements IPapyrusModel {
     }
 
     @Override
+    public IPMState find(UUID aSource) {
+        return (IPMState) fStateMap.get(aSource);
+    }
+
+    @Override
     public IPMStateMachine getRootState(String aString) {
         if (fRootState == null) {
             fRootState = new StateMachine(fUml.getRootState(), null, null);
+            fStateMap.put(fRootState.getUuid(), fRootState);
         }
         return fRootState;
     }
