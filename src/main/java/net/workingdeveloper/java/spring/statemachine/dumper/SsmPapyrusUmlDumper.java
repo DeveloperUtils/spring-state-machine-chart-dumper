@@ -52,14 +52,10 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
     }
 
     private void processMachine(IPapyrusModel.IPMRegionState aSM, StateMachine<S, E> aStateMachine) {
-
-        if (aStateMachine.getInitialState() != null) {
-//            aElement.setAttribute("initial", aStateMachine.getInitialState().getId().toString());
-        }
-        processRegion(aSM, aStateMachine);
+        processRegion(aSM, aStateMachine, aStateMachine.getInitialState());
     }
 
-    private void processRegion(IPapyrusModel.IPMRegionState aRegionState, Region<S, E> aSERegion) {
+    private void processRegion(IPapyrusModel.IPMRegionState aRegionState, Region<S, E> aSERegion, State<S, E> aInitialState) {
         Collection<State<S, E>> lStates = aSERegion.getStates();
         for (State<S, E> lState : lStates) {
             processState(aRegionState, lState);
@@ -121,15 +117,19 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
             if (aStateSsm.isSubmachineState()) {
                 if (aStateSsm instanceof AbstractState) {
                     lStatePM = aParentState.addSubMachine("");
-                    processMachine((IPapyrusModel.IPMStateMachine) lStatePM, ((AbstractState<S, E>) aStateSsm).getSubmachine());
+                    processMachine(
+                            (IPapyrusModel.IPMStateMachine) lStatePM,
+                            ((AbstractState<S, E>) aStateSsm).getSubmachine()
+                    );
                 }
             } else if (aStateSsm.isComposite()) {
                 if (aStateSsm instanceof RegionState) {
                     lStatePM = aParentState.addSubMachine(aStateSsm.getId().toString());
                     processRegionState((IPapyrusModel.IPMStateMachine) lStatePM, ((RegionState<S, E>) aStateSsm));
                 }
-                if (aStateSsm.isOrthogonal()) {
-                }
+//                if (aStateSsm.isOrthogonal()) {
+//
+//                }
             }
 
         }
@@ -139,36 +139,22 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
 
     }
 
-    private void processTransitions(Element aParentXml, StateMachine<S, E> aState) {
-        aState.getTransitions();
-    }
-
-    private void processTransitions(IPapyrusModel.IPMRegionState aParentXml, Region<S, E> aRegion) {
+    private void processTransitions(IPapyrusModel.IPMRegionState aParentRegionPM, Region<S, E> aRegion) {
         Collection<Transition<S, E>> lTransitions = aRegion.getTransitions();
         for (Transition<S, E> lTransition : lTransitions) {
         }
     }
 
     private void processRegionState(IPapyrusModel.IPMStateMachine aXml, RegionState<S, E> aRegionState) {
-
-//        Element lRegionRootXml = createElement("region");
-//        lRegionRootXml.setAttribute("id", aRegionState.getId().toString());
-//        aXml.appendChild(lRegionRootXml);
-//        int regCount = 0;
-//
+        int regCount = 0;
         for (Region<S, E> lRegion : aRegionState.getRegions()) {
-            IPapyrusModel.IPMRegionState lRegionPM = aXml.addRegion(lRegion.getId());
-//            Element lRegionXml = createElement("region");
-//            lRegionXml.setAttribute("id", aRegionState.getId().toString() + "r" + regCount);
-//            lRegionRootXml.appendChild(lRegionXml);
-//            Collection<State<S, E>> lStates = lRegion.getStates();
-//            for (State<S, E> lState : lStates) {
-//                Element lElement = processState(lRegionXml, lState);
-//                lRegionXml.appendChild(lElement);
-//            }
-//
-//            processTransitions(lRegionXml, lRegion);
-//            regCount++;
+            IPapyrusModel.IPMRegionState lRegionPM = aXml.addRegion(aRegionState.getId().toString() + "r" + regCount);
+            Collection<State<S, E>>      lStates   = lRegion.getStates();
+            for (State<S, E> lState : lStates) {
+                processState(lRegionPM, lState);
+            }
+            processTransitions(lRegionPM, lRegion);
+            regCount++;
         }
     }
 }
