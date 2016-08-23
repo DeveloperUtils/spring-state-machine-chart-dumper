@@ -4,6 +4,9 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collection;
 
 /**
@@ -58,7 +61,7 @@ public class SsmStringDumper<S, E> extends SsmDumper<S, E> {
     }
 
     private String processSubMachine(State<S, E> aState) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder           sb      = new StringBuilder();
         Collection<State<S, E>> lStates = aState.getStates();
         lStates.remove(aState);
         return processStates(lStates);

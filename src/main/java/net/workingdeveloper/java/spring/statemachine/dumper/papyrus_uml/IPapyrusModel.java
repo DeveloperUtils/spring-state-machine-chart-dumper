@@ -1,5 +1,7 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -88,6 +90,6 @@ public interface IPapyrusModel {
 
     IPMStateMachine getRootState(String aString);
 
-    void save(String aFilename);
+    void save(File aFilename) throws IOException;
 
 }

@@ -25,7 +25,6 @@ public class SsmScxmlDumper<S, E> extends SsmXmlDumper<S, E> {
         super(aStateMachine);
     }
 
-
     @Override
     public <T extends SsmXmlDumper<S, E>> T dump(Document aOutputDocument) {
         setXmlDocument(aOutputDocument);

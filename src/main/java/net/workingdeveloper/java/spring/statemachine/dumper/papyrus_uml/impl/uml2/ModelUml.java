@@ -13,6 +13,7 @@ import org.eclipse.uml2.uml.UMLPackage;
 import org.eclipse.uml2.uml.resource.UMLResource;
 import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -42,8 +43,8 @@ public class ModelUml {
         fModel.createPackageImport(umlLibrary);
     }
 
-    public void save(String Filename) {
-        save(fModel, URI.createFileURI("./").appendSegment(Filename).appendFileExtension(UMLResource.FILE_EXTENSION));
+    public void save(File Filename) throws IOException {
+        save(fModel, URI.createFileURI(Filename.getAbsolutePath()).appendFileExtension(UMLResource.FILE_EXTENSION));
     }
 
     protected void save(org.eclipse.uml2.uml.Package package_, URI uri) {

@@ -1,20 +1,12 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m;
 
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -23,7 +15,7 @@ import java.util.UUID;
  *
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
-public class ModelUml {
+class ModelUml extends ModelXmlBase {
 
     abstract class State {
         UUID    fID;
@@ -248,40 +240,10 @@ public class ModelUml {
 
     private static int                  sfId      = 0;
     private final  HashMap<UUID, State> fStateMap = new HashMap<>();
-    private Document         fDocument;
     private RootStateMachine fRootState;
 
     public ModelUml() throws ParserConfigurationException {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder        docBuilder = null;
-        docBuilder = docFactory.newDocumentBuilder();
-        // root elements
-        fDocument = docBuilder.newDocument();
-        fDocument.setXmlStandalone(true);
         appendStaticXml(getDocument());
-    }
-
-    public String asString() {
-        TransformerFactory tf          = TransformerFactory.newInstance();
-        Transformer        transformer = null;
-        try {
-            transformer = tf.newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-            StringWriter lWriter = new StringWriter();
-            transformer.transform(
-                    new DOMSource(getDocument()),
-                    new StreamResult(lWriter)
-            );
-            return lWriter.toString();
-        } catch (TransformerException aE) {
-            aE.printStackTrace();
-        }
-        return null;
     }
 
     public StateMachineState getRootState() {
@@ -292,7 +254,9 @@ public class ModelUml {
         return fRootState;
     }
 
-    public void save(String aFilename) {
+    @Override
+    public void save(File aFilename) throws IOException {
+        super.save(new File(aFilename.getAbsolutePath() + ".uml"));
     }
 
     private void appendStaticXml(Document lDoc) {
@@ -302,16 +266,16 @@ public class ModelUml {
         lRoot.setAttribute("xmi:version", "20131001");
         lRoot.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xmi", "http://www.omg.org/spec/XMI/20131001");
         lRoot.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        lRoot.setAttributeNS(
-                "http://www.w3.org/2000/xmlns/", "xmlns:ActionLanguage",
-                "http://www.omg.org/spec/ALF/20120827/ActionLanguage-Profile"
-        );
+//        lRoot.setAttributeNS(
+//                "http://www.w3.org/2000/xmlns/", "xmlns:ActionLanguage",
+//                "http://www.omg.org/spec/ALF/20120827/ActionLanguage-Profile"
+//        );
         lRoot.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ecore", "http://www.eclipse.org/emf/2002/Ecore");
         lRoot.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:uml", "http://www.eclipse.org/uml2/5.0.0/UML");
-        lRoot.setAttributeNS(
-                "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation",
-                "http://www.omg.org/spec/ALF/20120827/ActionLanguage-Profile pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"
-        );
+//        lRoot.setAttributeNS(
+//                "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation",
+//                "http://www.omg.org/spec/ALF/20120827/ActionLanguage-Profile pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"
+//        );
         Element lUmlModel = createElement("uml:Model");
         lUmlModel.setAttribute("xmi:id", UUID.randomUUID().toString());
         lUmlModel.setAttribute("name", "SsmDumper");
@@ -330,56 +294,44 @@ public class ModelUml {
         //insert packageElement
         getRootState().appendToParentXml(lUmlModel);
 
-        l3 = createElement("profileApplication");
-//        <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_FEd_AGUUEeanQ99zIc7c2Q">
-        l3.setAttribute("xmi:id", UUID.randomUUID().toString());
-        l3.setAttribute("xmi:type", "uml:ProfileApplication");
-        lUmlModel.appendChild(l3);
-//      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_FEf0MGUUEeanQ99zIc7c2Q" source="http://www.eclipse.org/uml2/2.0.0/UML">
-        l4 = createElement("eAnnotations");
-        l4.setAttribute("xmi:type", "ecore:EAnnotation");
-        l4.setAttribute("source", "http://www.eclipse.org/uml2/2.0.0/UML");
-        l4.setAttribute("xmi:id", UUID.randomUUID().toString());
-
-        l3.appendChild(l4);
-        Element l5 = createElement("references");
-        l4.appendChild(l5);
-        l3.setAttribute("xmi:type", "ecore:EPackage");
-        l3.setAttribute(
-                "href",
-                "pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"
-        );
+//        l3 = createElement("profileApplication");
+////        <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_FEd_AGUUEeanQ99zIc7c2Q">
+//        l3.setAttribute("xmi:id", UUID.randomUUID().toString());
+//        l3.setAttribute("xmi:type", "uml:ProfileApplication");
+//        lUmlModel.appendChild(l3);
+////      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_FEf0MGUUEeanQ99zIc7c2Q" source="http://www.eclipse.org/uml2/2.0.0/UML">
+//        l4 = createElement("eAnnotations");
+//        l4.setAttribute("xmi:type", "ecore:EAnnotation");
+//        l4.setAttribute("source", "http://www.eclipse.org/uml2/2.0.0/UML");
+//        l4.setAttribute("xmi:id", UUID.randomUUID().toString());
+//
+//        l3.appendChild(l4);
+//        Element l5 = createElement("references");
+//        l4.appendChild(l5);
+//        l3.setAttribute("xmi:type", "ecore:EPackage");
+//        l3.setAttribute(
+//                "href",
+//                "pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"
+//        );
 
 //        <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
 //      </eAnnotations>
 
 
-        l4 = createElement("appliedProfile");
-        l3.appendChild(l4);
-        l4.setAttribute("xmi:type", "uml:Profile");
-        l4.setAttribute(
-                "href",
-                "pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"
-        );
+//        l4 = createElement("appliedProfile");
+//        l3.appendChild(l4);
+//        l4.setAttribute("xmi:type", "uml:Profile");
+//        l4.setAttribute(
+//                "href",
+//                "pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"
+//        );
 //      <appliedProfile xmi:type="uml:Profile" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"/>
 //    </profileApplication>
 
-        lUmlModel = createElement("ActionLanguage:TextualRepresentation");
-        lUmlModel.setAttribute("xmi:id", UUID.randomUUID().toString());
-        lUmlModel.setAttribute("base_Comment", "_FEPVgGUUEeanQ99zIc7c2Q");
-        lUmlModel.setAttribute("language", "org.eclipse.papyrus.uml.textedit.transition.xtext.UmlTransition");
-        lRoot.appendChild(lUmlModel);
-    }
-
-    Element createElement(String tagName) throws DOMException {
-        return getDocument().createElement(tagName);
-    }
-
-    Element createElementNS(String namespaceURI, String qualifiedName) throws DOMException {
-        return getDocument().createElementNS(namespaceURI, qualifiedName);
-    }
-
-    Document getDocument() {
-        return fDocument;
+//        lUmlModel = createElement("ActionLanguage:TextualRepresentation");
+//        lUmlModel.setAttribute("xmi:id", UUID.randomUUID().toString());
+//        lUmlModel.setAttribute("base_Comment", "_FEPVgGUUEeanQ99zIc7c2Q");
+//        lUmlModel.setAttribute("language", "org.eclipse.papyrus.uml.textedit.transition.xtext.UmlTransition");
+//        lRoot.appendChild(lUmlModel);
     }
 }

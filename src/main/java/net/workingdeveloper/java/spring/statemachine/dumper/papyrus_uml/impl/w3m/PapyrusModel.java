@@ -3,6 +3,8 @@ package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -184,7 +186,7 @@ public class PapyrusModel implements IPapyrusModel {
     }
 
     @Override
-    public void save(String aFilename) {
+    public void save(File aFilename) throws IOException {
         fUml.save(aFilename);
         fNotation.save(aFilename);
         fDi.save(aFilename);

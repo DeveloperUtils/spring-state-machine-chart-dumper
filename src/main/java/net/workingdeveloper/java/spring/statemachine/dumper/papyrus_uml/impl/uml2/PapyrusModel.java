@@ -2,6 +2,8 @@ package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.um
 
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -101,7 +103,7 @@ public class PapyrusModel implements IPapyrusModel {
         return null;
     }
 
-    public void save(String aFilename) {
+    public void save(File aFilename) throws IOException {
         fUml.save(aFilename);
     }
 }

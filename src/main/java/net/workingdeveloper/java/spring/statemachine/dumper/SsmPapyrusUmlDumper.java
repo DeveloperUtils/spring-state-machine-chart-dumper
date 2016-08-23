@@ -11,6 +11,8 @@ import org.springframework.statemachine.transition.Transition;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +29,6 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
 
     public SsmPapyrusUmlDumper(StateMachine<S, E> aStateMachine) {
         super(aStateMachine);
-
     }
 
     @Override
@@ -44,9 +45,13 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
         }
 
         processMachine(fModel, getStateMachine());
-        fModel.save("test");
 
         return (T) this;
+    }
+
+    @Override
+    public void save(File aFile) throws IOException {
+        fModel.save(aFile);
     }
 
     private void processMachine(IPapyrusModel aSM, StateMachine<S, E> aStateMachine) {
