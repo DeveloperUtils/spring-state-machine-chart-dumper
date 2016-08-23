@@ -32,6 +32,11 @@ public class PapyrusModel implements IPapyrusModel {
             return null;
         }
 
+        @Override
+        public String getName() {
+            return null;
+        }
+
         public void setType(String aType) {
 
 
@@ -65,7 +70,7 @@ public class PapyrusModel implements IPapyrusModel {
         }
 
         @Override
-        public IPMRegionState setName(String aId) {
+        public IPMRegionState setName(String aName) {
             return null;
         }
     }

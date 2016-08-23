@@ -40,6 +40,7 @@ public class SsmPapyrusUmlDumperTest {
         );
         sut.dump();
         System.out.println(sut.asString());
+        sut.save(new File("/home/christoph/workspace/papyrus/test/test_model"));
     }
 
     @Test

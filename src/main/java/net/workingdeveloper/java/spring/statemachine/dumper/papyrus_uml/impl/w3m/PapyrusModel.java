@@ -46,6 +46,7 @@ public class PapyrusModel implements IPapyrusModel {
         public UUID getUuid() {
             return fUmlState.getUuid();
         }
+        public String getName() { return fUmlState.getName();}
     }
 
     public class SimpleState extends State<ModelUml.State, ModelNotation.State, RegionState> implements IPMState {
@@ -105,7 +106,7 @@ public class PapyrusModel implements IPapyrusModel {
                             aTargetState.getUuid()
                     )
             );
-
+            lTransition.setName(aSourceState.getName() + "__" + aTargetState.getName());
 
             return lTransition;
         }
@@ -124,6 +125,12 @@ public class PapyrusModel implements IPapyrusModel {
         public Transaction(IPMRegionState aParent, ModelUml.Transition aTransition) {
             fParent = aParent;
             fTransition = aTransition;
+        }
+
+        @Override
+        public IPMTransition setName(String aName) {
+            fTransition.setName(aName);
+            return this;
         }
 
         @Override

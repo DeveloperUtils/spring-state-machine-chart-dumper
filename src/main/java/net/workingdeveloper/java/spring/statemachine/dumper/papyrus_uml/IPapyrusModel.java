@@ -26,6 +26,8 @@ public interface IPapyrusModel {
         String getId();
 
         UUID getUuid();
+
+        String getName();
     }
 
     interface IPMRegionState extends IPMState {
@@ -40,7 +42,7 @@ public interface IPapyrusModel {
 
         IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState);
 
-        IPMRegionState setName(String aId);
+        IPMRegionState setName(String aName);
     }
 
     interface IPMPseudoState extends IPMState {
@@ -82,6 +84,8 @@ public interface IPapyrusModel {
         IPMTransition setSource(IPMState aState);
 
         IPMTransition setTarget(IPMState aTarget);
+
+        IPMTransition setName(String aName);
     }
 
     String asString();

@@ -56,12 +56,15 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
 
     private void processMachine(IPapyrusModel aSM, StateMachine<S, E> aStateMachine) {
         IPapyrusModel.IPMStateMachine lStateMachine = aSM.getRootState(getStateMachine().getId());
-        IPapyrusModel.IPMRegionState  lRootRegion   = lStateMachine.addRegion(aStateMachine.getUuid(), "Root");
-        processMachine(lRootRegion, aStateMachine);
+        processMachine(lStateMachine, aStateMachine, null);
     }
 
-    private void processMachine(IPapyrusModel.IPMRegionState aSM, StateMachine<S, E> aStateMachine) {
-        processRegion(aSM, aStateMachine, aStateMachine.getInitialState());
+    private void processMachine(IPapyrusModel.IPMStateMachine aSM, StateMachine<S, E> aStateMachine, State<S, E> aSsmParent) {
+        IPapyrusModel.IPMRegionState lRootRegion = aSM.addRegion(
+                aStateMachine.getUuid(),
+                aSsmParent == null ? "root" : aSsmParent.getId() + "r0"
+        );
+        processRegion(lRootRegion, aStateMachine, aStateMachine.getInitialState());
     }
 
     private void processRegion(IPapyrusModel.IPMRegionState aRegionState, Region<S, E> aSERegion, State<S, E> aInitialState) {
@@ -146,10 +149,11 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
         } else {
             if (aStateSsm.isSubmachineState()) {
                 if (aStateSsm instanceof AbstractState) {
-                    lStatePM = aParentState.addSubMachine(uuidFromState(aStateSsm), "");
+                    lStatePM = aParentState.addSubMachine(uuidFromState(aStateSsm), aStateSsm.getId().toString());
                     processMachine(
                             (IPapyrusModel.IPMStateMachine) lStatePM,
-                            ((AbstractState<S, E>) aStateSsm).getSubmachine()
+                            ((AbstractState<S, E>) aStateSsm).getSubmachine(),
+                            aStateSsm
                     );
                 }
             } else if (aStateSsm.isComposite()) {
@@ -183,9 +187,8 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
     private void processRegionState(IPapyrusModel.IPMStateMachine aXml, RegionState<S, E> aRegionState) {
         int regCount = 0;
         for (Region<S, E> lRegion : aRegionState.getRegions()) {
-            IPapyrusModel.IPMRegionState lRegionPM = aXml.addRegion(uuidFromState(aRegionState), aRegionState.
-                                                                                                                     getId()
-                                                                                                             .toString() + "r" + regCount);
+            IPapyrusModel.IPMRegionState lRegionPM = aXml.addRegion(
+                    uuidFromState(lRegion), aRegionState.getId().toString() + "r" + regCount);
             Collection<State<S, E>> lStates = lRegion.getStates();
             for (State<S, E> lState : lStates) {
                 processState(lRegionPM, lState);
@@ -195,9 +198,9 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
         }
     }
 
-    private UUID uuidFromState(State<S, E> aId) {
-        if (!fUUIDMap.containsKey(aId.toString()))
-            fUUIDMap.put(aId.toString(), UUID.randomUUID());
-        return fUUIDMap.get(aId.toString());
+    private UUID uuidFromState(Object aRegion) {
+        if (!fUUIDMap.containsKey(aRegion.toString()))
+            fUUIDMap.put(aRegion.toString(), UUID.randomUUID());
+        return fUUIDMap.get(aRegion.toString());
     }
 }

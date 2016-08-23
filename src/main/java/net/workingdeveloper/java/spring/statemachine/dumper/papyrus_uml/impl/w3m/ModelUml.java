@@ -43,12 +43,16 @@ class ModelUml extends ModelXmlBase {
             }
         }
 
-        public Element getXmlNode() {
-            return fXmlNode;
+        public String getName() {
+            return getXmlNode().getAttribute("name");
         }
 
         public void setName(String aName) {
             getXmlNode().setAttribute("name", aName);
+        }
+
+        public Element getXmlNode() {
+            return fXmlNode;
         }
 
         UUID getUuid() {
@@ -90,6 +94,10 @@ class ModelUml extends ModelXmlBase {
 
         public void appendToParentXml(Element aNode) {
             aNode.appendChild(fXmlNode);
+        }
+
+        public void setName(String aName) {
+            fXmlNode.setAttribute("name", aName);
         }
 
         public void setSource(String aSource) {
