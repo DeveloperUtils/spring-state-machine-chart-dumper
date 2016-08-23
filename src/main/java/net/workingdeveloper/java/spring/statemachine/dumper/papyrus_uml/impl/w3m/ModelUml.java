@@ -17,18 +17,18 @@ import java.util.UUID;
  */
 class ModelUml extends ModelXmlBase {
 
-    abstract class State {
+    abstract class MUNode {
         UUID    fID;
-        State   fParent;
+        MUNode  fParent;
         Element fXmlNode;
 
-        public State(UUID aId, State aParent) {
+        public MUNode(UUID aId, MUNode aParent) {
             fParent = aParent;
             fID = aId;
             ModelUml.this.fStateMap.put(aId, this);
         }
 
-        public State appendToParentXml(Element aXmlNode) {
+        public MUNode appendToParentXml(Element aXmlNode) {
             aXmlNode.appendChild(fXmlNode);
             return this;
         }
@@ -65,9 +65,9 @@ class ModelUml extends ModelXmlBase {
         abstract Element createXmlElement();
     }
 
-    class SimpleState extends State {
+    class SimpleState extends MUNode {
 
-        public SimpleState(UUID aID, State aParent) {
+        public SimpleState(UUID aID, MUNode aParent) {
             super(aID, aParent);
             fXmlNode = createXmlElement();
         }
@@ -81,19 +81,21 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class Transition {
+    class Transition extends MUNode {
         Element fXmlNode;
 
-        public Transition(UUID aSourceStateUuid, UUID aTargetStateUuid) {
+        public Transition(UUID aSourceStateUuid, UUID aTargetStateUuid, MUNode aParent) {
+            super(UUID.randomUUID(), aParent);
             fXmlNode = createElement("transition");
             fXmlNode.setAttribute("xmi:type", "uml:Transition");
-            fXmlNode.setAttribute("xmi:id", UUID.randomUUID().toString());
+            fXmlNode.setAttribute("xmi:id", getUuid().toString());
             setSource(aSourceStateUuid.toString());
             setTarget(aTargetStateUuid.toString());
         }
 
-        public void appendToParentXml(Element aNode) {
+        public MUNode appendToParentXml(Element aNode) {
             aNode.appendChild(fXmlNode);
+            return this;
         }
 
         public void setName(String aName) {
@@ -107,13 +109,17 @@ class ModelUml extends ModelXmlBase {
         public void setTarget(String aTarget) {
             fXmlNode.setAttribute("target", aTarget);
         }
+
+        @Override
+        Element createXmlElement() {
+            return null;
+        }
     }
 
-    class RegionState extends State {
+    abstract class MURegionMachineShared extends MUNode {
 
-        public RegionState(UUID aUUID, State aParent) {
-            super(aUUID, aParent);
-            fXmlNode = createXmlElement();
+        public MURegionMachineShared(UUID aId, MUNode aParent) {
+            super(aId, aParent);
         }
 
         public PseudoState addPseudoState(IPapyrusModel.PseudoKind aKind, UUID aUUID, String aName) {
@@ -145,10 +151,20 @@ class ModelUml extends ModelXmlBase {
         }
 
         public Transition addTransition(UUID aSourceStateUuid, UUID aTargetStateUuid) {
-            Transition lTransition = new Transition(aSourceStateUuid, aTargetStateUuid);
+            Transition lTransition = new Transition(aSourceStateUuid, aTargetStateUuid, this);
             lTransition.appendToParentXml(getXmlNode());
             return lTransition;
         }
+
+    }
+
+    class RegionState extends MURegionMachineShared {
+
+        public RegionState(UUID aUUID, MUNode aParent) {
+            super(aUUID, aParent);
+            fXmlNode = createXmlElement();
+        }
+
 
         @Override
         Element createXmlElement() {
@@ -161,9 +177,9 @@ class ModelUml extends ModelXmlBase {
 
     }
 
-    class PseudoState extends State {
+    class PseudoState extends MUNode {
 
-        public PseudoState(UUID aUUID, IPapyrusModel.PseudoKind aKind, State aParent) {
+        public PseudoState(UUID aUUID, IPapyrusModel.PseudoKind aKind, MUNode aParent) {
             super(aUUID, aParent);
             fXmlNode = createXmlElement(aKind);
         }
@@ -213,10 +229,11 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class StateMachineState extends RegionState {
+    class StateMachineState extends MURegionMachineShared {
 
-        public StateMachineState(UUID aUUID, State aParent) {
+        public StateMachineState(UUID aUUID, MUNode aParent) {
             super(aUUID, aParent);
+            fXmlNode = createXmlElement();
         }
 
         @Override
@@ -230,7 +247,7 @@ class ModelUml extends ModelXmlBase {
     }
 
     class RootStateMachine extends StateMachineState {
-        public RootStateMachine(UUID aUUID, State aParent) {
+        public RootStateMachine(UUID aUUID, MUNode aParent) {
             super(aUUID, aParent);
             fXmlNode = createXmlElement();
         }
@@ -246,15 +263,15 @@ class ModelUml extends ModelXmlBase {
 
     }
 
-    private static int                  sfId      = 0;
-    private final  HashMap<UUID, State> fStateMap = new HashMap<>();
+    private static int                   sfId      = 0;
+    private final  HashMap<UUID, MUNode> fStateMap = new HashMap<>();
     private RootStateMachine fRootState;
 
     public ModelUml() throws ParserConfigurationException {
         appendStaticXml(getDocument());
     }
 
-    public StateMachineState getRootState() {
+    public RootStateMachine getRootState() {
         if (fRootState == null) {
             fRootState = new RootStateMachine(UUID.randomUUID(), null);
             fStateMap.put(fRootState.getUuid(), fRootState);
