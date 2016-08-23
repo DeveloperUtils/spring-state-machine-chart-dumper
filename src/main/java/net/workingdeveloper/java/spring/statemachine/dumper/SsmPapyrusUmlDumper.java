@@ -1,7 +1,9 @@
 package net.workingdeveloper.java.spring.statemachine.dumper;
 
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
+import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.IId;
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.PapyrusModel;
+import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.UuidId;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.region.Region;
 import org.springframework.statemachine.state.AbstractState;
@@ -16,7 +18,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by Christoph Graupner on 8/20/16.
@@ -25,7 +26,7 @@ import java.util.UUID;
  */
 public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
     IPapyrusModel fModel;
-    Map<String, UUID> fUUIDMap = new HashMap<>();
+    Map<String, IId> fUUIDMap = new HashMap<>();
 
     public SsmPapyrusUmlDumper(StateMachine<S, E> aStateMachine) {
         super(aStateMachine);
@@ -61,7 +62,7 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
 
     private void processMachine(IPapyrusModel.IPMStateMachine aSM, StateMachine<S, E> aStateMachine, State<S, E> aSsmParent) {
         IPapyrusModel.IPMRegionState lRootRegion = aSM.addRegion(
-                aStateMachine.getUuid(),
+                new UuidId(aStateMachine.getUuid()),
                 aSsmParent == null ? "root" : aSsmParent.getId() + "r0"
         );
         processRegion(lRootRegion, aStateMachine, aStateMachine.getInitialState());
@@ -198,9 +199,9 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
         }
     }
 
-    private UUID uuidFromState(Object aRegion) {
+    private IId uuidFromState(Object aRegion) {
         if (!fUUIDMap.containsKey(aRegion.toString()))
-            fUUIDMap.put(aRegion.toString(), UUID.randomUUID());
+            fUUIDMap.put(aRegion.toString(), new UuidId());
         return fUUIDMap.get(aRegion.toString());
     }
 }

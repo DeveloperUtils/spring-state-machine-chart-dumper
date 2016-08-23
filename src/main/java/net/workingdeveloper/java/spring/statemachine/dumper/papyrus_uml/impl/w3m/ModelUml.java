@@ -8,7 +8,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * Created by Christoph Graupner on 8/22/16.
@@ -18,14 +17,14 @@ import java.util.UUID;
 class ModelUml extends ModelXmlBase {
 
     abstract class MUNode {
-        UUID    fID;
+        IId     fID;
         MUNode  fParent;
         Element fXmlNode;
 
-        public MUNode(UUID aId, MUNode aParent) {
+        public MUNode(IId aIid, MUNode aParent) {
             fParent = aParent;
-            fID = aId;
-            ModelUml.this.fStateMap.put(aId, this);
+            fID = aIid;
+            ModelUml.this.fStateMap.put(aIid, this);
         }
 
         public MUNode appendToParentXml(Element aXmlNode) {
@@ -55,9 +54,9 @@ class ModelUml extends ModelXmlBase {
             return fXmlNode;
         }
 
-        UUID getUuid() {
+        IId getUuid() {
             if (fID == null) {
-                fID = UUID.randomUUID();
+                fID = new UuidId();
             }
             return fID;
         }
@@ -65,10 +64,10 @@ class ModelUml extends ModelXmlBase {
         abstract Element createXmlElement();
     }
 
-    class SimpleState extends MUNode {
+    class MUSimpleState extends MUNode {
 
-        public SimpleState(UUID aID, MUNode aParent) {
-            super(aID, aParent);
+        MUSimpleState(IId aIid, MUNode aParent) {
+            super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
 
@@ -81,11 +80,11 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class Transition extends MUNode {
+    class MUTransition extends MUNode {
         Element fXmlNode;
 
-        public Transition(UUID aSourceStateUuid, UUID aTargetStateUuid, MUNode aParent) {
-            super(UUID.randomUUID(), aParent);
+        MUTransition(IId aSourceStateUuid, IId aTargetStateUuid, MUNode aParent) {
+            super(new UuidId(), aParent);
             fXmlNode = createElement("transition");
             fXmlNode.setAttribute("xmi:type", "uml:Transition");
             fXmlNode.setAttribute("xmi:id", getUuid().toString());
@@ -118,50 +117,50 @@ class ModelUml extends ModelXmlBase {
 
     abstract class MURegionMachineShared extends MUNode {
 
-        public MURegionMachineShared(UUID aId, MUNode aParent) {
-            super(aId, aParent);
+        public MURegionMachineShared(IId aIid, MUNode aParent) {
+            super(aIid, aParent);
         }
 
-        public PseudoState addPseudoState(IPapyrusModel.PseudoKind aKind, UUID aUUID, String aName) {
-            PseudoState lPseudoState = new PseudoState(aUUID, aKind, this);
-            lPseudoState.appendToParentXml(getXmlNode());
-            lPseudoState.setName(aName);
-            return lPseudoState;
+        public MUPseudoState addPseudoState(IPapyrusModel.PseudoKind aKind, IId aIid, String aName) {
+            MUPseudoState lMUPseudoState = new MUPseudoState(aIid, aKind, this);
+            lMUPseudoState.appendToParentXml(getXmlNode());
+            lMUPseudoState.setName(aName);
+            return lMUPseudoState;
         }
 
-        public RegionState addRegionState(UUID aUUID, String aName) {
-            RegionState lRegionState = new RegionState(aUUID, this);
-            lRegionState.setName(aName);
-            lRegionState.appendToParentXml(getXmlNode());
-            return lRegionState;
+        public MURegionState addRegionState(IId aIid, String aName) {
+            MURegionState lMURegionState = new MURegionState(aIid, this);
+            lMURegionState.setName(aName);
+            lMURegionState.appendToParentXml(getXmlNode());
+            return lMURegionState;
         }
 
-        public SimpleState addState(UUID aUUID, String aS) {
-            SimpleState lSimpleState = new SimpleState(aUUID, this);
-            lSimpleState.setName(aS);
-            lSimpleState.appendToParentXml(getXmlNode());
-            return lSimpleState;
+        public MUSimpleState addState(IId aIid, String aName) {
+            MUSimpleState lMUSimpleState = new MUSimpleState(aIid, this);
+            lMUSimpleState.setName(aName);
+            lMUSimpleState.appendToParentXml(getXmlNode());
+            return lMUSimpleState;
         }
 
-        public StateMachineState addSubMachine(UUID aUUID, String aS) {
-            StateMachineState lStateMachineState = new StateMachineState(aUUID, this);
-            lStateMachineState.setName(aS);
-            lStateMachineState.appendToParentXml(getXmlNode());
-            return lStateMachineState;
+        public MUStateMachineState addSubMachine(IId aIid, String aName) {
+            MUStateMachineState lMUStateMachineState = new MUStateMachineState(aIid, this);
+            lMUStateMachineState.setName(aName);
+            lMUStateMachineState.appendToParentXml(getXmlNode());
+            return lMUStateMachineState;
         }
 
-        public Transition addTransition(UUID aSourceStateUuid, UUID aTargetStateUuid) {
-            Transition lTransition = new Transition(aSourceStateUuid, aTargetStateUuid, this);
-            lTransition.appendToParentXml(getXmlNode());
-            return lTransition;
+        public MUTransition addTransition(IId aSourceStateUuid, IId aTargetStateUuid) {
+            MUTransition lMUTransition = new MUTransition(aSourceStateUuid, aTargetStateUuid, this);
+            lMUTransition.appendToParentXml(getXmlNode());
+            return lMUTransition;
         }
 
     }
 
-    class RegionState extends MURegionMachineShared {
+    class MURegionState extends MURegionMachineShared {
 
-        public RegionState(UUID aUUID, MUNode aParent) {
-            super(aUUID, aParent);
+        MURegionState(IId aIid, MUNode aParent) {
+            super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
 
@@ -177,10 +176,10 @@ class ModelUml extends ModelXmlBase {
 
     }
 
-    class PseudoState extends MUNode {
+    class MUPseudoState extends MUNode {
 
-        public PseudoState(UUID aUUID, IPapyrusModel.PseudoKind aKind, MUNode aParent) {
-            super(aUUID, aParent);
+        MUPseudoState(IId aIid, IPapyrusModel.PseudoKind aKind, MUNode aParent) {
+            super(aIid, aParent);
             fXmlNode = createXmlElement(aKind);
         }
 
@@ -229,10 +228,10 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class StateMachineState extends MURegionMachineShared {
+    class MUStateMachineState extends MURegionMachineShared {
 
-        public StateMachineState(UUID aUUID, MUNode aParent) {
-            super(aUUID, aParent);
+        MUStateMachineState(IId aIid, MUNode aParent) {
+            super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
 
@@ -246,9 +245,9 @@ class ModelUml extends ModelXmlBase {
 
     }
 
-    class RootStateMachine extends StateMachineState {
-        public RootStateMachine(UUID aUUID, MUNode aParent) {
-            super(aUUID, aParent);
+    class MURootStateMachine extends MUStateMachineState {
+        public MURootStateMachine(IId aIid, MUNode aParent) {
+            super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
 
@@ -263,17 +262,16 @@ class ModelUml extends ModelXmlBase {
 
     }
 
-    private static int                   sfId      = 0;
-    private final  HashMap<UUID, MUNode> fStateMap = new HashMap<>();
-    private RootStateMachine fRootState;
+    private final HashMap<IId, MUNode> fStateMap = new HashMap<>();
+    private MURootStateMachine fRootState;
 
     public ModelUml() throws ParserConfigurationException {
         appendStaticXml(getDocument());
     }
 
-    public RootStateMachine getRootState() {
+    public MURootStateMachine getRootState() {
         if (fRootState == null) {
-            fRootState = new RootStateMachine(UUID.randomUUID(), null);
+            fRootState = new MURootStateMachine(new UuidId(), null);
             fStateMap.put(fRootState.getUuid(), fRootState);
         }
         return fRootState;
@@ -302,13 +300,13 @@ class ModelUml extends ModelXmlBase {
 //                "http://www.omg.org/spec/ALF/20120827/ActionLanguage-Profile pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"
 //        );
         Element lUmlModel = createElement("uml:Model");
-        lUmlModel.setAttribute("xmi:id", UUID.randomUUID().toString());
+        lUmlModel.setAttribute("xmi:id", (new UuidId()).toString());
         lUmlModel.setAttribute("name", "SsmDumper");
         lRoot.appendChild(lUmlModel);
 
         Element l3 = createElement("packageImport");
         l3.setAttribute("xmi:type", "uml:PackageImport");
-        l3.setAttribute("xmi:id", UUID.randomUUID().toString());
+        l3.setAttribute("xmi:id", (new UuidId()).toString());
         lUmlModel.appendChild(l3);
 
         Element l4 = createElement("importedPackage");

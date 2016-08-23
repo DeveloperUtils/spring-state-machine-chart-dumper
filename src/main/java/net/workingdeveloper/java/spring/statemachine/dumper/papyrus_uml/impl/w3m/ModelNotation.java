@@ -35,15 +35,15 @@ class ModelNotation extends ModelXmlBase {
         }
     }
 
-    class MNSimpleState extends MNState<ModelUml.SimpleState, MNRegionMachineShared> {
-        MNSimpleState(MNRegionMachineShared aParentNode, ModelUml.SimpleState aLinkedMUNode) {
+    class MNSimpleState extends MNState<ModelUml.MUSimpleState, MNRegionMachineShared> {
+        MNSimpleState(MNRegionMachineShared aParentNode, ModelUml.MUSimpleState aLinkedMUNode) {
             super(aParentNode, aLinkedMUNode);
         }
     }
 
-    class MNPseudoState extends MNState<ModelUml.PseudoState, MNRegionMachineShared> {
+    class MNPseudoState extends MNState<ModelUml.MUPseudoState, MNRegionMachineShared> {
 
-        MNPseudoState(MNRegionMachineShared aParentNode, ModelUml.PseudoState aLinkedMUNode) {
+        MNPseudoState(MNRegionMachineShared aParentNode, ModelUml.MUPseudoState aLinkedMUNode) {
             super(aParentNode, aLinkedMUNode);
         }
     }
@@ -54,40 +54,40 @@ class ModelNotation extends ModelXmlBase {
             super(aParentNode, aLinkedMUNode);
         }
 
-        MNPseudoState addPseudoState(ModelUml.PseudoState aMUNode) {
+        MNPseudoState addPseudoState(ModelUml.MUPseudoState aMUNode) {
             return new MNPseudoState(this, aMUNode);
         }
 
-        MNRegionState addRegionState(ModelUml.RegionState aMUNode) {
+        MNRegionState addRegionState(ModelUml.MURegionState aMUNode) {
             return new MNRegionState(this, aMUNode);
         }
 
-        MNSimpleState addSimpleState(ModelUml.SimpleState aMUNode) {
+        MNSimpleState addSimpleState(ModelUml.MUSimpleState aMUNode) {
             return new MNSimpleState(this, aMUNode);
         }
 
-        MNStateMachine addSubMachine(ModelUml.StateMachineState aMUNode) {
+        MNStateMachine addSubMachine(ModelUml.MUStateMachineState aMUNode) {
             return new MNStateMachine(this, aMUNode);
         }
     }
 
-    class MNRegionState extends MNRegionMachineShared<ModelUml.RegionState, MNRegionMachineShared> {
-        MNRegionState(MNRegionMachineShared aParentNode, ModelUml.RegionState aLinkedMUNode) {
+    class MNRegionState extends MNRegionMachineShared<ModelUml.MURegionState, MNRegionMachineShared> {
+        MNRegionState(MNRegionMachineShared aParentNode, ModelUml.MURegionState aLinkedMUNode) {
             super(aParentNode, aLinkedMUNode);
         }
 
     }
 
-    class MNStateMachine extends MNRegionMachineShared<ModelUml.StateMachineState, MNRegionMachineShared> {
+    class MNStateMachine extends MNRegionMachineShared<ModelUml.MUStateMachineState, MNRegionMachineShared> {
 
-        MNStateMachine(MNRegionMachineShared aParentNode, ModelUml.StateMachineState aLinkedMUNode) {
+        MNStateMachine(MNRegionMachineShared aParentNode, ModelUml.MUStateMachineState aLinkedMUNode) {
             super(aParentNode, aLinkedMUNode);
         }
     }
 
     class MNRootStateMachine extends MNStateMachine {
 
-        MNRootStateMachine(Element aNotationRoot, ModelUml.StateMachineState aLinkedMUNode) {
+        MNRootStateMachine(Element aNotationRoot, ModelUml.MUStateMachineState aLinkedMUNode) {
             super(null, aLinkedMUNode);
             createXml(aNotationRoot);
         }
@@ -122,9 +122,9 @@ class ModelNotation extends ModelXmlBase {
         }
     }
 
-    class MNTransition extends MNNode<ModelUml.Transition, MNRegionState> {
+    class MNTransition extends MNNode<ModelUml.MUTransition, MNRegionState> {
 
-        public MNTransition(MNRegionState aParentNode, ModelUml.Transition aLinkedMUNode) {
+        public MNTransition(MNRegionState aParentNode, ModelUml.MUTransition aLinkedMUNode) {
             super(aParentNode, aLinkedMUNode);
         }
     }
@@ -141,7 +141,7 @@ class ModelNotation extends ModelXmlBase {
         fModelUml = aModelUml;
     }
 
-    public MNStateMachine getRootState(ModelUml.StateMachineState aRootState) {
+    public MNStateMachine getRootState(ModelUml.MUStateMachineState aRootState) {
         if (fRootState == null) {
             fRootState = new MNRootStateMachine(fDiagram, aRootState);
         }

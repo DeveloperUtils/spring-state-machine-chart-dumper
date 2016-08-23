@@ -1,5 +1,7 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml;
 
+import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.IId;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
@@ -25,20 +27,20 @@ public interface IPapyrusModel {
 
         String getId();
 
-        UUID getUuid();
+        IId getUuid();
 
         String getName();
     }
 
     interface IPMRegionState extends IPMState {
 
-        IPMPseudoState addPseudoState(UUID aUUID, String aName, UmlType aFinalstate);
+        IPMPseudoState addPseudoState(IId aUUID, String aName, UmlType aFinalstate);
 
-        IPMPseudoState addPseudoState(UUID aUUID, String aName, PseudoKind aDeepHistory);
+        IPMPseudoState addPseudoState(IId aUUID, String aName, PseudoKind aDeepHistory);
 
-        IPMState addState(UUID aUUID, String aS);
+        IPMState addState(IId aUUID, String aS);
 
-        IPMStateMachine addSubMachine(UUID aUUID, String aId);
+        IPMStateMachine addSubMachine(IId aUUID, String aId);
 
         IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState);
 
@@ -77,7 +79,7 @@ public interface IPapyrusModel {
     }
 
     interface IPMStateMachine extends IPMRegionState {
-        IPMRegionState addRegion(UUID aUUID, String aName);
+        IPMRegionState addRegion(IId aUUID, String aName);
     }
 
     interface IPMTransition {
@@ -90,7 +92,7 @@ public interface IPapyrusModel {
 
     String asString();
 
-    IPMState find(UUID aSource);
+    IPMState find(IId aSource);
 
     IPMStateMachine getRootState(String aString);
 

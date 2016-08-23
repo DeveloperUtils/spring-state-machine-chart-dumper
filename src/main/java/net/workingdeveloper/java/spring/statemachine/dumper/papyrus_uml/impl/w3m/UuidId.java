@@ -14,6 +14,26 @@ public class UuidId implements IId {
         fUuid = UUID.randomUUID();
     }
 
+    public UuidId(UUID aUuid) {
+        fUuid = aUuid;
+    }
+
+    @Override
+    public boolean equals(Object laO) {
+        if (this == laO) return true;
+        if (!(laO instanceof UuidId)) return false;
+
+        UuidId llUuidId = (UuidId) laO;
+
+        return fUuid.equals(llUuidId.fUuid);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return fUuid.hashCode();
+    }
+
     @Override
     public String toString() {
         return fUuid.toString();

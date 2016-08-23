@@ -6,7 +6,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * Created by Christoph Graupner on 8/22/16.
@@ -14,26 +13,26 @@ import java.util.UUID;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 public class PapyrusModel implements IPapyrusModel {
-    public class StateMachine extends PMRegionMachineSharedState<ModelUml.StateMachineState, ModelNotation.MNStateMachine, PMRegionMachineSharedState> implements IPMStateMachine {
+    class PMStateMachine extends PMRegionMachineSharedState<ModelUml.MUStateMachineState, ModelNotation.MNStateMachine, PMRegionMachineSharedState> implements IPMStateMachine {
 
-        public StateMachine(ModelUml.StateMachineState aUmlState, ModelNotation.MNStateMachine aNotationState, PMRegionMachineSharedState aParent) {
+        public PMStateMachine(ModelUml.MUStateMachineState aUmlState, ModelNotation.MNStateMachine aNotationState, PMRegionMachineSharedState aParent) {
             super(aUmlState, aNotationState, aParent);
         }
 
         @Override
-        public IPMRegionState addRegion(UUID aUUID, String aName) {
-            ModelUml.RegionState lUmlState = fUmlState.addRegionState(aUUID, aName);
-            return new RegionState(lUmlState, fNotationState.addRegionState(lUmlState), this);
+        public IPMRegionState addRegion(IId aUUID, String aName) {
+            ModelUml.MURegionState lUmlState = fUmlState.addRegionState(aUUID, aName);
+            return new PMRegionState(lUmlState, fNotationState.addRegionState(lUmlState), this);
         }
 
     }
 
-    public class State<UMLMODEL extends ModelUml.MUNode, NOTATIONMODEL extends ModelNotation.MNNode, PARENT extends State> {
+    abstract class PMState<UMLMODEL extends ModelUml.MUNode, NOTATIONMODEL extends ModelNotation.MNNode, PARENT extends PMState> {
         NOTATIONMODEL fNotationState;
         PARENT        fParent;
         UMLMODEL      fUmlState;
 
-        public State(UMLMODEL aUmlState, NOTATIONMODEL aNotationState, PARENT aParent) {
+        PMState(UMLMODEL aUmlState, NOTATIONMODEL aNotationState, PARENT aParent) {
             fUmlState = aUmlState;
             fNotationState = aNotationState;
             fParent = aParent;
@@ -48,32 +47,32 @@ public class PapyrusModel implements IPapyrusModel {
             return fUmlState.getName();
         }
 
-        public UUID getUuid() {
+        public IId getUuid() {
             return fUmlState.getUuid();
         }
     }
 
-    public class SimpleState extends State<ModelUml.MUNode, ModelNotation.MNNode, PMRegionMachineSharedState> implements IPMState {
+    class PMSimpleState extends PMState<ModelUml.MUNode, ModelNotation.MNNode, PMRegionMachineSharedState> implements IPMState {
 
-        public SimpleState(ModelUml.MUNode aUmlMUNode, ModelNotation.MNNode aNotationState, PMRegionMachineSharedState aParent) {
+        public PMSimpleState(ModelUml.MUNode aUmlMUNode, ModelNotation.MNNode aNotationState, PMRegionMachineSharedState aParent) {
             super(aUmlMUNode, aNotationState, aParent);
         }
 
     }
 
-    abstract public class PMRegionMachineSharedState<UMLMODEL extends ModelUml.MURegionMachineShared, NOTATIONMODEL extends ModelNotation.MNRegionMachineShared, PARENT extends State> extends State<UMLMODEL, NOTATIONMODEL, PARENT> implements IPMRegionState {
+    abstract class PMRegionMachineSharedState<UMLMODEL extends ModelUml.MURegionMachineShared, NOTATIONMODEL extends ModelNotation.MNRegionMachineShared, PARENT extends PMState> extends PMState<UMLMODEL, NOTATIONMODEL, PARENT> implements IPMRegionState {
 
         public PMRegionMachineSharedState(UMLMODEL aUmlState, NOTATIONMODEL aNotationState, PARENT aParent) {
             super(aUmlState, aNotationState, aParent);
         }
 
         @Override
-        public IPMPseudoState addPseudoState(UUID aUUID, String aName, UmlType aFinalstate) {
+        public IPMPseudoState addPseudoState(IId aUUID, String aName, UmlType aFinalstate) {
             switch (aFinalstate) {
 
                 case FINALSTATE:
-                    ModelUml.PseudoState lUmlMUNode = fUmlState.addPseudoState(PseudoKind.FINAL, aUUID, aName);
-                    return new PseudoState(lUmlMUNode, fNotationState.addPseudoState(lUmlMUNode), this);
+                    ModelUml.MUPseudoState lUmlMUNode = fUmlState.addPseudoState(PseudoKind.FINAL, aUUID, aName);
+                    return new PMPseudoState(lUmlMUNode, fNotationState.addPseudoState(lUmlMUNode), this);
                 case PSEUDO_STATE:
                     break;
                 case STATE:
@@ -83,28 +82,28 @@ public class PapyrusModel implements IPapyrusModel {
         }
 
         @Override
-        public IPMPseudoState addPseudoState(UUID aUUID, String aName, PseudoKind aKind) {
-            ModelUml.PseudoState lUmlMUNode = fUmlState.addPseudoState(aKind, aUUID, aName);
-            return new PseudoState(lUmlMUNode, fNotationState.addPseudoState(lUmlMUNode), this);
+        public IPMPseudoState addPseudoState(IId aUUID, String aName, PseudoKind aKind) {
+            ModelUml.MUPseudoState lUmlMUNode = fUmlState.addPseudoState(aKind, aUUID, aName);
+            return new PMPseudoState(lUmlMUNode, fNotationState.addPseudoState(lUmlMUNode), this);
         }
 
         @Override
-        public IPMState addState(UUID aUUID, String aS) {
-            ModelUml.SimpleState lUmlMUNode = fUmlState.addState(aUUID, aS);
-            return new SimpleState(lUmlMUNode, fNotationState.addSimpleState(lUmlMUNode), this);
+        public IPMState addState(IId aUUID, String aName) {
+            ModelUml.MUSimpleState lUmlMUNode = fUmlState.addState(aUUID, aName);
+            return new PMSimpleState(lUmlMUNode, fNotationState.addSimpleState(lUmlMUNode), this);
         }
 
 
         @Override
-        public IPMStateMachine addSubMachine(UUID aUUID, String aS) {
-            ModelUml.StateMachineState lUmlState = fUmlState.addSubMachine(aUUID, aS);
-            return new StateMachine(lUmlState, fNotationState.addSubMachine(lUmlState), this);
+        public IPMStateMachine addSubMachine(IId aUUID, String aName) {
+            ModelUml.MUStateMachineState lUmlState = fUmlState.addSubMachine(aUUID, aName);
+            return new PMStateMachine(lUmlState, fNotationState.addSubMachine(lUmlState), this);
         }
 
         @Override
         public IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState) {
 
-            IPMTransition lTransition = new Transaction(
+            IPMTransition lTransition = new PMTransaction(
                     this,
                     fUmlState.addTransition(
                             aSourceState.getUuid(),
@@ -123,47 +122,47 @@ public class PapyrusModel implements IPapyrusModel {
         }
     }
 
-    public class RegionState extends PMRegionMachineSharedState<ModelUml.RegionState, ModelNotation.MNRegionState, PMRegionMachineSharedState> implements IPMRegionState {
+    class PMRegionState extends PMRegionMachineSharedState<ModelUml.MURegionState, ModelNotation.MNRegionState, PMRegionMachineSharedState> implements IPMRegionState {
 
-        public RegionState(ModelUml.RegionState aUmlState, ModelNotation.MNRegionState aNotationState, PMRegionMachineSharedState aParent) {
+        PMRegionState(ModelUml.MURegionState aUmlState, ModelNotation.MNRegionState aNotationState, PMRegionMachineSharedState aParent) {
             super(aUmlState, aNotationState, aParent);
         }
 
 
     }
 
-    class Transaction implements IPMTransition {
-        IPMRegionState      fParent;
-        ModelUml.Transition fTransition;
+    class PMTransaction implements IPMTransition {
+        IPMRegionState        fParent;
+        ModelUml.MUTransition fMUTransition;
 
-        public Transaction(IPMRegionState aParent, ModelUml.Transition aTransition) {
+        public PMTransaction(IPMRegionState aParent, ModelUml.MUTransition aMUTransition) {
             fParent = aParent;
-            fTransition = aTransition;
+            fMUTransition = aMUTransition;
         }
 
         @Override
         public IPMTransition setName(String aName) {
-            fTransition.setName(aName);
+            fMUTransition.setName(aName);
             return this;
         }
 
         @Override
-        public IPMTransition setSource(IPMState aState) {
-            fTransition.setSource(aState.getId());
+        public IPMTransition setSource(IPMState aSource) {
+            fMUTransition.setSource(aSource.getId());
             return this;
         }
 
         @Override
         public IPMTransition setTarget(IPMState aTarget) {
-            fTransition.setTarget(aTarget.getId());
+            fMUTransition.setTarget(aTarget.getId());
             return this;
         }
     }
 
-    public class PseudoState extends State<ModelUml.MUNode, ModelNotation.MNNode, PMRegionMachineSharedState> implements IPMPseudoState {
+    class PMPseudoState extends PMState<ModelUml.MUNode, ModelNotation.MNNode, PMRegionMachineSharedState> implements IPMPseudoState {
         PseudoKind fKind;
 
-        public PseudoState(ModelUml.MUNode aUmlMUNode, ModelNotation.MNNode aNotationState, PMRegionMachineSharedState aParent) {
+        public PMPseudoState(ModelUml.MUNode aUmlMUNode, ModelNotation.MNNode aNotationState, PMRegionMachineSharedState aParent) {
             super(aUmlMUNode, aNotationState, aParent);
         }
 
@@ -177,9 +176,9 @@ public class PapyrusModel implements IPapyrusModel {
 
     ModelDi       fDi;
     ModelNotation fNotation;
-    HashMap<UUID, State> fStateMap = new HashMap<>();
+    HashMap<IId, PMState> fStateMap = new HashMap<>();
     ModelUml fUml;
-    private StateMachine fRootState;
+    private PMStateMachine fRootState;
 
     public PapyrusModel() throws ParserConfigurationException {
         fUml = new ModelUml();
@@ -193,14 +192,14 @@ public class PapyrusModel implements IPapyrusModel {
     }
 
     @Override
-    public IPMState find(UUID aSource) {
+    public IPMState find(IId aSource) {
         return (IPMState) fStateMap.get(aSource);
     }
 
     @Override
-    public IPMStateMachine getRootState(String aString) {
+    public IPMStateMachine getRootState(String aName) {
         if (fRootState == null) {
-            fRootState = new StateMachine(fUml.getRootState(), fNotation.getRootState(fUml.getRootState()), null);
+            fRootState = new PMStateMachine(fUml.getRootState(), fNotation.getRootState(fUml.getRootState()), null);
             fStateMap.put(fRootState.getUuid(), fRootState);
         }
         return fRootState;
