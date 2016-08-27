@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.statemachine.StateMachine;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -35,9 +36,11 @@ public class SsmPapyrusUmlDumperTest {
 
     @Test
     public void dumpAll() throws Exception {
+        StateMachine<AllStates.States, AllStates.Events> lSM = (new AllStates()).buildMachine();
         SsmPapyrusUmlDumper<AllStates.States, AllStates.Events> sut = new SsmPapyrusUmlDumper<>(
-                (new AllStates()).buildMachine()
+                lSM
         );
+
         sut.dump();
         System.out.println(sut.asString());
         sut.save(new File("/home/christoph/workspace/papyrus/test/test_model"));
@@ -51,6 +54,5 @@ public class SsmPapyrusUmlDumperTest {
         );
         sut.dump();
         System.out.println(sut.asString());
-
     }
 }

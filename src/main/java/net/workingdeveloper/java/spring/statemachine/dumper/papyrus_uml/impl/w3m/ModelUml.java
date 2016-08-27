@@ -54,7 +54,7 @@ class ModelUml extends ModelXmlBase {
             return fXmlNode;
         }
 
-        IId getUuid() {
+        IId getXmiId() {
             if (fID == null) {
                 fID = new UuidId();
             }
@@ -64,49 +64,50 @@ class ModelUml extends ModelXmlBase {
         abstract Element createXmlElement();
     }
 
-    class MUSimpleState extends MUNode {
+    class MUPseudoState extends MUNode {
 
-        MUSimpleState(IId aIid, MUNode aParent) {
+        MUPseudoState(IId aIid, IPapyrusModel.PseudoKind aKind, MUNode aParent) {
             super(aIid, aParent);
-            fXmlNode = createXmlElement();
+            fXmlNode = createXmlElement(aKind);
         }
 
-        @Override
-        Element createXmlElement() {
-            Element lXml = createElement("subvertex");
-            lXml.setAttribute("xmi:type", "uml:State");
-            lXml.setAttribute("xmi:id", getUuid().toString());
-            return lXml;
-        }
-    }
-
-    class MUTransition extends MUNode {
-        Element fXmlNode;
-
-        MUTransition(IId aSourceStateUuid, IId aTargetStateUuid, MUNode aParent) {
-            super(new UuidId(), aParent);
-            fXmlNode = createElement("transition");
-            fXmlNode.setAttribute("xmi:type", "uml:Transition");
-            fXmlNode.setAttribute("xmi:id", getUuid().toString());
-            setSource(aSourceStateUuid.toString());
-            setTarget(aTargetStateUuid.toString());
-        }
-
-        public MUNode appendToParentXml(Element aNode) {
-            aNode.appendChild(fXmlNode);
-            return this;
-        }
-
-        public void setName(String aName) {
-            fXmlNode.setAttribute("name", aName);
-        }
-
-        public void setSource(String aSource) {
-            fXmlNode.setAttribute("source", aSource);
-        }
-
-        public void setTarget(String aTarget) {
-            fXmlNode.setAttribute("target", aTarget);
+        private Element createXmlElement(IPapyrusModel.PseudoKind aKind) {
+            Element lElement = createElement("subvertex");
+            lElement.setAttribute("xmi:type", "uml:Pseudostate");
+            lElement.setAttribute("xmi:id", getXmiId().toString());
+            switch (aKind) {
+                case SHALLOW_HISTORY:
+                    lElement.setAttribute("kind", "shallowHistory");
+                    break;
+                case FORK:
+                    lElement.setAttribute("kind", "fork");
+                    break;
+                case INITIAL:
+//                    lElement.setAttribute("kind","inital");
+                    break;
+                case CHOICE:
+                    lElement.setAttribute("kind", "choice");
+                    break;
+                case JUNCTION:
+                    lElement.setAttribute("kind", "junction");
+                    break;
+                case JOIN:
+                    lElement.setAttribute("kind", "join");
+                    break;
+                case ENTRY_POINT:
+                    lElement.setAttribute("kind", "entryPoint");
+                    break;
+                case EXIT_POINT:
+                    lElement.setAttribute("kind", "exitPoint");
+                    break;
+                case DEEP_HISTORY:
+                    lElement.setAttribute("kind", "deepHistory");
+                    break;
+                case FINAL:
+                    lElement.setAttribute("xmi:type", "uml:FinalState");
+                    break;
+            }
+            return lElement;
         }
 
         @Override
@@ -149,12 +150,11 @@ class ModelUml extends ModelXmlBase {
             return lMUStateMachineState;
         }
 
-        public MUTransition addTransition(IId aSourceStateUuid, IId aTargetStateUuid) {
-            MUTransition lMUTransition = new MUTransition(aSourceStateUuid, aTargetStateUuid, this);
+        public MUTransition addTransition(IId aSourceStateUuid, IId aTargetStateUuid, MUTrigger aMUTrigger) {
+            MUTransition lMUTransition = new MUTransition(aSourceStateUuid, aTargetStateUuid, aMUTrigger, this);
             lMUTransition.appendToParentXml(getXmlNode());
             return lMUTransition;
         }
-
     }
 
     class MURegionState extends MURegionMachineShared {
@@ -164,67 +164,45 @@ class ModelUml extends ModelXmlBase {
             fXmlNode = createXmlElement();
         }
 
-
         @Override
         Element createXmlElement() {
             Element lXml = createElement("region");
             lXml.setAttribute("xmi:type", "uml:Region");
-            lXml.setAttribute("xmi:id", getUuid().toString());
+            lXml.setAttribute("xmi:id", getXmiId().toString());
 
             return lXml;
         }
-
     }
 
-    class MUPseudoState extends MUNode {
-
-        MUPseudoState(IId aIid, IPapyrusModel.PseudoKind aKind, MUNode aParent) {
+    class MURootStateMachine extends MUStateMachineState {
+        public MURootStateMachine(IId aIid, MUNode aParent) {
             super(aIid, aParent);
-            fXmlNode = createXmlElement(aKind);
-        }
-
-        private Element createXmlElement(IPapyrusModel.PseudoKind aKind) {
-            Element lElement = createElement("subvertex");
-            lElement.setAttribute("xmi:type", "uml:Pseudostate");
-            lElement.setAttribute("xmi:id", getUuid().toString());
-            switch (aKind) {
-                case SHALLOW_HISTORY:
-                    lElement.setAttribute("kind", "shallowHistory");
-                    break;
-                case FORK:
-                    lElement.setAttribute("kind", "fork");
-                    break;
-                case INITIAL:
-//                    lElement.setAttribute("kind","inital");
-                    break;
-                case CHOICE:
-                    lElement.setAttribute("kind", "choice");
-                    break;
-                case JUNCTION:
-                    lElement.setAttribute("kind", "junction");
-                    break;
-                case JOIN:
-                    lElement.setAttribute("kind", "join");
-                    break;
-                case ENTRY_POINT:
-                    lElement.setAttribute("kind", "entryPoint");
-                    break;
-                case EXIT_POINT:
-                    lElement.setAttribute("kind", "exitPoint");
-                    break;
-                case DEEP_HISTORY:
-                    lElement.setAttribute("kind", "deepHistory");
-                    break;
-                case FINAL:
-                    lElement.setAttribute("xmi:type", "uml:FinalState");
-                    break;
-            }
-            return lElement;
+            fXmlNode = createXmlElement();
         }
 
         @Override
         Element createXmlElement() {
-            return null;
+            Element lXml = createElement("packagedElement");
+            lXml.setAttribute("xmi:type", "uml:StateMachine");
+            lXml.setAttribute("xmi:id", getXmiId().toString());
+            lXml.setAttribute("name", "StateMachine");
+            return lXml;
+        }
+    }
+
+    class MUSimpleState extends MUNode {
+
+        MUSimpleState(IId aIid, MUNode aParent) {
+            super(aIid, aParent);
+            fXmlNode = createXmlElement();
+        }
+
+        @Override
+        Element createXmlElement() {
+            Element lXml = createElement("subvertex");
+            lXml.setAttribute("xmi:type", "uml:State");
+            lXml.setAttribute("xmi:id", getXmiId().toString());
+            return lXml;
         }
     }
 
@@ -239,40 +217,114 @@ class ModelUml extends ModelXmlBase {
         Element createXmlElement() {
             Element lXml = createElement("subvertex");
             lXml.setAttribute("xmi:type", "uml:State");
-            lXml.setAttribute("xmi:id", getUuid().toString());
+            lXml.setAttribute("xmi:id", getXmiId().toString());
             return lXml;
         }
-
     }
 
-    class MURootStateMachine extends MUStateMachineState {
-        public MURootStateMachine(IId aIid, MUNode aParent) {
-            super(aIid, aParent);
+    class MUTransition extends MUNode {
+        private final MUTrigger fTrigger;
+        Element fXmlNode;
+
+        MUTransition(IId aSourceStateUuid, IId aTargetStateUuid, MUTrigger aMUTrigger, MUNode aParent) {
+            super(new UuidId(), aParent);
+            fTrigger = aMUTrigger;
             fXmlNode = createXmlElement();
+            setSource(aSourceStateUuid.toString());
+            setTarget(aTargetStateUuid.toString());
+        }
+
+        public MUNode appendToParentXml(Element aNode) {
+            aNode.appendChild(fXmlNode);
+            return this;
+        }
+
+        public void setName(String aName) {
+            fXmlNode.setAttribute("name", aName);
+        }
+
+        public void setSource(String aSource) {
+            fXmlNode.setAttribute("source", aSource);
+        }
+
+        public void setTarget(String aTarget) {
+            fXmlNode.setAttribute("target", aTarget);
         }
 
         @Override
         Element createXmlElement() {
-            Element lXml = createElement("packagedElement");
-            lXml.setAttribute("xmi:type", "uml:StateMachine");
-            lXml.setAttribute("xmi:id", getUuid().toString());
-            lXml.setAttribute("name", "StateMachine");
-            return lXml;
+            Element lRet = createElement("transition");
+            lRet.setAttribute("xmi:type", "uml:Transition");
+            lRet.setAttribute("xmi:id", getXmiId().toString());
+            if (fTrigger != null) {
+                Element lTrigger = createElement("trigger");
+                lRet.appendChild(lTrigger);
+                lTrigger.setAttribute("xmi:id", new UuidId().toString());
+                lTrigger.setAttribute("name", fTrigger.getName());
+                lTrigger.setAttribute("event", fTrigger.getXmiId().toString());
+            }
+            return lRet;
+        }
+    }
+
+    class MUTrigger extends MUNode {
+
+        private final String                        fEvent;
+        private final IPapyrusModel.IPMTrigger.Type fType;
+
+        public MUTrigger(IId aId, Element aUmlModel, String aEvent, IPapyrusModel.IPMTrigger.Type aType) {
+            super(aId, null);
+            fEvent = aEvent;
+            fType = aType;
+            createXmlElement(aUmlModel);
         }
 
+        @Override
+        public String getName() {
+            return fEvent;
+        }
+
+        @Override
+        public void setName(String aName) {
+        }
+
+        private void createXmlElement(Element aModel) {
+            Element lSignal = createElement("packagedElement");
+            lSignal.setAttribute("xmi:type", "uml:Signal");
+            String lValue = new UuidId().toString();
+            lSignal.setAttribute("xmi:id", lValue);
+            lSignal.setAttribute("name", fEvent);
+            aModel.appendChild(lSignal);
+            Element lSignalEvent = createElement("packagedElement");
+            lSignalEvent.setAttribute("xmi:type", "uml:SignalEvent");
+            lSignalEvent.setAttribute("xmi:id", getXmiId().toString());
+            lSignalEvent.setAttribute("name", fEvent + "Event");
+            lSignalEvent.setAttribute("signal", lValue);
+            aModel.appendChild(lSignalEvent);
+        }
+
+        @Override
+        Element createXmlElement() {
+            return null;
+        }
     }
 
     private final HashMap<IId, MUNode> fStateMap = new HashMap<>();
     private MURootStateMachine fRootState;
+    private Element            fUmlModel;
 
     public ModelUml() throws ParserConfigurationException {
         appendStaticXml(getDocument());
     }
 
+    public MUTrigger addTrigger(IId aId, String aEvent, IPapyrusModel.IPMTrigger.Type aType) {
+        return new MUTrigger(aId, fUmlModel, aEvent, aType);
+    }
+
     public MURootStateMachine getRootState() {
         if (fRootState == null) {
             fRootState = new MURootStateMachine(new UuidId(), null);
-            fStateMap.put(fRootState.getUuid(), fRootState);
+            fStateMap.put(fRootState.getXmiId(), fRootState);
         }
         return fRootState;
     }
@@ -299,15 +351,15 @@ class ModelUml extends ModelXmlBase {
 //                "http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation",
 //                "http://www.omg.org/spec/ALF/20120827/ActionLanguage-Profile pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"
 //        );
-        Element lUmlModel = createElement("uml:Model");
-        lUmlModel.setAttribute("xmi:id", (new UuidId()).toString());
-        lUmlModel.setAttribute("name", "SsmDumper");
-        lRoot.appendChild(lUmlModel);
+        fUmlModel = createElement("uml:Model");
+        fUmlModel.setAttribute("xmi:id", (new UuidId()).toString());
+        fUmlModel.setAttribute("name", "SsmDumper");
+        lRoot.appendChild(fUmlModel);
 
         Element l3 = createElement("packageImport");
         l3.setAttribute("xmi:type", "uml:PackageImport");
         l3.setAttribute("xmi:id", (new UuidId()).toString());
-        lUmlModel.appendChild(l3);
+        fUmlModel.appendChild(l3);
 
         Element l4 = createElement("importedPackage");
         l4.setAttribute("xmi:type", "uml:Model");
@@ -315,7 +367,7 @@ class ModelUml extends ModelXmlBase {
         l3.appendChild(l4);
 
         //insert packageElement
-        getRootState().appendToParentXml(lUmlModel);
+        getRootState().appendToParentXml(fUmlModel);
 
 //        l3 = createElement("profileApplication");
 ////        <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_FEd_AGUUEeanQ99zIc7c2Q">
@@ -339,7 +391,6 @@ class ModelUml extends ModelXmlBase {
 
 //        <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
 //      </eAnnotations>
-
 
 //        l4 = createElement("appliedProfile");
 //        l3.appendChild(l4);

@@ -6,7 +6,7 @@ group 'net.workingdeveloper.java.spring'
 
 jar {
     baseName = 'net.workingdeveloper.java.spring.statemachine.dumper'
-    version = '0.0.4-SNAPSHOT'
+    version = '0.0.5-SNAPSHOT'
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -48,9 +48,12 @@ unpuzzle {
 dependencies {
     compile("org.springframework.statemachine:spring-statemachine-core:1.1+")
     compile("org.springframework.statemachine:spring-statemachine-uml:1.1+")
+    compile 'org.slf4j:slf4j-api:+'
+    compile 'org.slf4j:jcl-over-slf4j:+'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.+'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.+'
     compile group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.+'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.+'
     compile group: 'papyrus-neon', name: 'org.eclipse.uml2.uml', version: '5+'
     compile group: 'papyrus-neon', name: 'org.eclipse.uml2.uml.resources', version: '5+'
     testCompile("org.springframework.statemachine:spring-statemachine-test:1.1+")

@@ -325,7 +325,7 @@ class ModelNotation extends ModelXmlBase {
             Element lE = createElement("element");
             lElement.appendChild(lE);
             lE.setAttribute("xmi:type", "uml:Region");
-            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getUuid());
+            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getXmiId());
             fChangeOnSave.add(lE.getAttributeNode("href"));
 
             Element lLayoutConstraint = createElement("layoutConstraint");
@@ -394,13 +394,13 @@ class ModelNotation extends ModelXmlBase {
             Element lSubElem = createElement("owner");
             lStyles.appendChild(lSubElem);
             lSubElem.setAttribute("xmi:type", "uml:StateMachine");
-            lSubElem.setAttribute("href", PLACEHOLDER_FILENAME + "#" + fLinkedMUNode.getUuid());
+            lSubElem.setAttribute("href", PLACEHOLDER_FILENAME + "#" + fLinkedMUNode.getXmiId());
             fChangeOnSave.add(lSubElem.getAttributeNode("href"));
 
             Element lE = createElement("element");
             aRoot.appendChild(lE);
             lE.setAttribute("xmi:type", "uml:StateMachine");
-            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getUuid());
+            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getXmiId());
             fChangeOnSave.add(lE.getAttributeNode("href"));
 
 //<styles xmi:type="notation:StringValueStyle" xmi:id="_vAu-_WktEeaWtbhQKbDHLA" name="diagram_compatibility_version" stringValue="1.2.0"/>
@@ -479,7 +479,7 @@ class ModelNotation extends ModelXmlBase {
             Element lE = createElement("element");
             lElement.appendChild(lE);
             lE.setAttribute("xmi:type", "uml:StateMachine");
-            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getUuid());
+            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getXmiId());
             fChangeOnSave.add(lE.getAttributeNode("href"));
 
             lLayoutConstraint = createElement("layoutConstraint");
@@ -582,7 +582,7 @@ class ModelNotation extends ModelXmlBase {
             Element lE = createElement("element");
             lElement.appendChild(lE);
             lE.setAttribute("xmi:type", "uml:State");
-            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getUuid());
+            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getXmiId());
             fChangeOnSave.add(lE.getAttributeNode("href"));
 
             lLayoutConstraint = createElement("layoutConstraint");
@@ -743,7 +743,7 @@ class ModelNotation extends ModelXmlBase {
             Element lE = createElement("element");
             lElement.appendChild(lE);
             lE.setAttribute("xmi:type", "uml:State");
-            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getUuid());
+            lE.setAttribute("href", PLACEHOLDER_FILENAME + '#' + fLinkedMUNode.getXmiId());
             fChangeOnSave.add(lE.getAttributeNode("href"));
 
             lLayoutConstraint = createElement("layoutConstraint");

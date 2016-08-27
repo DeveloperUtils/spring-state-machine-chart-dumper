@@ -4,12 +4,15 @@ import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrus
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.IId;
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.PapyrusModel;
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.UuidId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.region.Region;
 import org.springframework.statemachine.state.AbstractState;
 import org.springframework.statemachine.state.RegionState;
 import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.transition.Transition;
+import org.springframework.statemachine.trigger.TimerTrigger;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,6 +28,7 @@ import java.util.Map;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
+    private static final Logger logger = LoggerFactory.getLogger(SsmPapyrusUmlDumper.class);
     IPapyrusModel fModel;
     Map<String, IId> fUUIDMap = new HashMap<>();
 
@@ -162,12 +166,10 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
                     lStatePM = aParentState.addSubMachine(
                             uuidFromState(aStateSsm), aStateSsm.getId().toString());
                     processRegionState((IPapyrusModel.IPMStateMachine) lStatePM, ((RegionState<S, E>) aStateSsm));
+                } else {
+                    logger.error("Here is wrong");
                 }
-//                if (aStateSsm.isOrthogonal()) {
-//
-//                }
             }
-
         }
     }
 
@@ -178,9 +180,16 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
     private void processTransitions(IPapyrusModel.IPMRegionState aParentRegionPM, Region<S, E> aRegion) {
         Collection<Transition<S, E>> lTransitions = aRegion.getTransitions();
         for (Transition<S, E> lTransition : lTransitions) {
+            IPapyrusModel.IPMTrigger lTrigger = fModel.addTrigger(
+                    lTransition.getTrigger().getEvent().toString(),
+                    lTransition.getTrigger() instanceof TimerTrigger ? IPapyrusModel.IPMTrigger.Type.TIMER
+                                                                     : IPapyrusModel.IPMTrigger.Type.EVENT
+            );
             aParentRegionPM.addTransition(
                     fModel.find(uuidFromState(lTransition.getSource())),
-                    fModel.find(uuidFromState(lTransition.getTarget()))
+                    fModel.find(uuidFromState(lTransition.getTarget())),
+                    lTransition.getKind(),
+                    lTrigger
             );
         }
     }

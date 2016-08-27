@@ -1,10 +1,10 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml;
 
 import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.IId;
+import org.springframework.statemachine.transition.TransitionKind;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Created by Christoph Graupner on 8/22/16.
@@ -27,9 +27,9 @@ public interface IPapyrusModel {
 
         String getId();
 
-        IId getUuid();
-
         String getName();
+
+        IId getUuid();
     }
 
     interface IPMRegionState extends IPMState {
@@ -42,7 +42,7 @@ public interface IPapyrusModel {
 
         IPMStateMachine addSubMachine(IId aUUID, String aId);
 
-        IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState);
+        IPMTransition addTransition(IPMState aSourceState, IPMState aTargetState, TransitionKind aKind, IPMTrigger aTrigger);
 
         IPMRegionState setName(String aName);
     }
@@ -83,12 +83,24 @@ public interface IPapyrusModel {
     }
 
     interface IPMTransition {
+        IPMTransition setName(String aName);
+
         IPMTransition setSource(IPMState aState);
 
         IPMTransition setTarget(IPMState aTarget);
-
-        IPMTransition setName(String aName);
     }
+
+    interface IPMTrigger {
+        enum Type {
+            TIMER, EVENT
+        }
+
+        IId getId();
+
+        String getName();
+    }
+
+    IPMTrigger addTrigger(String aEvent, IPMTrigger.Type aType);
 
     String asString();
 
@@ -97,5 +109,4 @@ public interface IPapyrusModel {
     IPMStateMachine getRootState(String aString);
 
     void save(File aFilename) throws IOException;
-
 }
