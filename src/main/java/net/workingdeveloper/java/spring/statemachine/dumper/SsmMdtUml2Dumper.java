@@ -1,9 +1,9 @@
 package net.workingdeveloper.java.spring.statemachine.dumper;
 
-import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
-import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.IId;
-import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.PapyrusModel;
-import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m.UuidId;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IMdtUml2Model;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m.IId;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m.MdtUml2Model;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m.UuidId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
@@ -27,12 +27,12 @@ import java.util.Map;
  *
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
-public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
-    private static final Logger logger = LoggerFactory.getLogger(SsmPapyrusUmlDumper.class);
-    IPapyrusModel fModel;
-    Map<String, IId> fUUIDMap = new HashMap<>();
+public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
+    private static final Logger logger = LoggerFactory.getLogger(SsmMdtUml2Dumper.class);
+    private IMdtUml2Model fModel;
+    private Map<String, IId> fUUIDMap = new HashMap<>();
 
-    public SsmPapyrusUmlDumper(StateMachine<S, E> aStateMachine) {
+    public SsmMdtUml2Dumper(StateMachine<S, E> aStateMachine) {
         super(aStateMachine);
     }
 
@@ -44,7 +44,7 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
     @Override
     public <T extends SsmDumper> T dump() {
         try {
-            fModel = new PapyrusModel();
+            fModel = new MdtUml2Model();
         } catch (ParserConfigurationException aE) {
             aE.printStackTrace();
         }
@@ -59,20 +59,20 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
         fModel.save(aFile);
     }
 
-    private void processMachine(IPapyrusModel aSM, StateMachine<S, E> aStateMachine) {
-        IPapyrusModel.IPMStateMachine lStateMachine = aSM.getRootState(getStateMachine().getId());
+    private void processMachine(IMdtUml2Model aSM, StateMachine<S, E> aStateMachine) {
+        IMdtUml2Model.IMUStateMachine lStateMachine = aSM.getRootState(getStateMachine().getId());
         processMachine(lStateMachine, aStateMachine, null);
     }
 
-    private void processMachine(IPapyrusModel.IPMStateMachine aSM, StateMachine<S, E> aStateMachine, State<S, E> aSsmParent) {
-        IPapyrusModel.IPMRegionState lRootRegion = aSM.addRegion(
+    private void processMachine(IMdtUml2Model.IMUStateMachine aSM, StateMachine<S, E> aStateMachine, State<S, E> aSsmParent) {
+        IMdtUml2Model.IMURegionState lRootRegion = aSM.addRegion(
                 new UuidId(aStateMachine.getUuid()),
                 aSsmParent == null ? "root" : aSsmParent.getId() + "r0"
         );
         processRegion(lRootRegion, aStateMachine, aStateMachine.getInitialState());
     }
 
-    private void processRegion(IPapyrusModel.IPMRegionState aRegionState, Region<S, E> aSERegion, State<S, E> aInitialState) {
+    private void processRegion(IMdtUml2Model.IMURegionState aRegionState, Region<S, E> aSERegion, State<S, E> aInitialState) {
         Collection<State<S, E>> lStates = aSERegion.getStates();
         for (State<S, E> lState : lStates) {
             processState(aRegionState, lState);
@@ -80,8 +80,8 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
         processTransitions(aRegionState, aSERegion);
     }
 
-    private void processState(IPapyrusModel.IPMRegionState aParentState, State<S, E> aStateSsm) {
-        IPapyrusModel.IPMState lStatePM;
+    private void processState(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
+        IMdtUml2Model.IMUState lStatePM;
 
         if (aStateSsm.isSimple()) {
             if (aStateSsm.getPseudoState() != null) {
@@ -89,61 +89,61 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
                     case END:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.UmlType.FINALSTATE
+                                IMdtUml2Model.UmlType.FINALSTATE
                         );
                         break;
                     case HISTORY_SHALLOW:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.SHALLOW_HISTORY
+                                IMdtUml2Model.PseudoKind.SHALLOW_HISTORY
                         );
                         break;
                     case HISTORY_DEEP:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.DEEP_HISTORY
+                                IMdtUml2Model.PseudoKind.DEEP_HISTORY
                         );
                         break;
                     case FORK:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.FORK
+                                IMdtUml2Model.PseudoKind.FORK
                         );
                         break;
                     case INITIAL:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.INITIAL
+                                IMdtUml2Model.PseudoKind.INITIAL
                         );
                         break;
                     case CHOICE:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.CHOICE
+                                IMdtUml2Model.PseudoKind.CHOICE
                         );
                         break;
                     case JUNCTION:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.JUNCTION
+                                IMdtUml2Model.PseudoKind.JUNCTION
                         );
                         break;
                     case JOIN:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.JOIN
+                                IMdtUml2Model.PseudoKind.JOIN
                         );
                         break;
                     case ENTRY:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.ENTRY_POINT
+                                IMdtUml2Model.PseudoKind.ENTRY_POINT
                         );
                         break;
                     case EXIT:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IPapyrusModel.PseudoKind.EXIT_POINT
+                                IMdtUml2Model.PseudoKind.EXIT_POINT
                         );
                         break;
                 }
@@ -156,7 +156,7 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
                 if (aStateSsm instanceof AbstractState) {
                     lStatePM = aParentState.addSubMachine(uuidFromState(aStateSsm), aStateSsm.getId().toString());
                     processMachine(
-                            (IPapyrusModel.IPMStateMachine) lStatePM,
+                            (IMdtUml2Model.IMUStateMachine) lStatePM,
                             ((AbstractState<S, E>) aStateSsm).getSubmachine(),
                             aStateSsm
                     );
@@ -165,7 +165,7 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
                 if (aStateSsm instanceof RegionState) {
                     lStatePM = aParentState.addSubMachine(
                             uuidFromState(aStateSsm), aStateSsm.getId().toString());
-                    processRegionState((IPapyrusModel.IPMStateMachine) lStatePM, ((RegionState<S, E>) aStateSsm));
+                    processRegionState((IMdtUml2Model.IMUStateMachine) lStatePM, ((RegionState<S, E>) aStateSsm));
                 } else {
                     logger.error("Here is wrong");
                 }
@@ -177,13 +177,13 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
 
     }
 
-    private void processTransitions(IPapyrusModel.IPMRegionState aParentRegionPM, Region<S, E> aRegion) {
+    private void processTransitions(IMdtUml2Model.IMURegionState aParentRegionPM, Region<S, E> aRegion) {
         Collection<Transition<S, E>> lTransitions = aRegion.getTransitions();
         for (Transition<S, E> lTransition : lTransitions) {
-            IPapyrusModel.IPMTrigger lTrigger = fModel.addTrigger(
+            IMdtUml2Model.IMUTrigger lTrigger = fModel.addTrigger(
                     lTransition.getTrigger().getEvent().toString(),
-                    lTransition.getTrigger() instanceof TimerTrigger ? IPapyrusModel.IPMTrigger.Type.TIMER
-                                                                     : IPapyrusModel.IPMTrigger.Type.EVENT
+                    lTransition.getTrigger() instanceof TimerTrigger ? IMdtUml2Model.IMUTrigger.Type.TIMER
+                                                                     : IMdtUml2Model.IMUTrigger.Type.EVENT
             );
             aParentRegionPM.addTransition(
                     fModel.find(uuidFromState(lTransition.getSource())),
@@ -194,10 +194,10 @@ public class SsmPapyrusUmlDumper<S, E> extends SsmDumper<S, E> {
         }
     }
 
-    private void processRegionState(IPapyrusModel.IPMStateMachine aXml, RegionState<S, E> aRegionState) {
+    private void processRegionState(IMdtUml2Model.IMUStateMachine aXml, RegionState<S, E> aRegionState) {
         int regCount = 0;
         for (Region<S, E> lRegion : aRegionState.getRegions()) {
-            IPapyrusModel.IPMRegionState lRegionPM = aXml.addRegion(
+            IMdtUml2Model.IMURegionState lRegionPM = aXml.addRegion(
                     uuidFromState(lRegion), aRegionState.getId().toString() + "r" + regCount);
             Collection<State<S, E>> lStates = lRegion.getStates();
             for (State<S, E> lState : lStates) {

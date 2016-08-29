@@ -1,6 +1,6 @@
-package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m;
+package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m;
 
-import net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.IPapyrusModel;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IMdtUml2Model;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -16,18 +16,18 @@ import java.util.HashMap;
  */
 class ModelUml extends ModelXmlBase {
 
-    abstract class MUNode {
+    abstract class MXUNode {
         IId     fID;
-        MUNode  fParent;
+        MXUNode fParent;
         Element fXmlNode;
 
-        public MUNode(IId aIid, MUNode aParent) {
+        public MXUNode(IId aIid, MXUNode aParent) {
             fParent = aParent;
             fID = aIid;
             ModelUml.this.fStateMap.put(aIid, this);
         }
 
-        public MUNode appendToParentXml(Element aXmlNode) {
+        public MXUNode appendToParentXml(Element aXmlNode) {
             aXmlNode.appendChild(fXmlNode);
             return this;
         }
@@ -64,14 +64,14 @@ class ModelUml extends ModelXmlBase {
         abstract Element createXmlElement();
     }
 
-    class MUPseudoState extends MUNode {
+    class MXUPseudoState extends MXUNode {
 
-        MUPseudoState(IId aIid, IPapyrusModel.PseudoKind aKind, MUNode aParent) {
+        MXUPseudoState(IId aIid, IMdtUml2Model.PseudoKind aKind, MXUNode aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement(aKind);
         }
 
-        private Element createXmlElement(IPapyrusModel.PseudoKind aKind) {
+        private Element createXmlElement(IMdtUml2Model.PseudoKind aKind) {
             Element lElement = createElement("subvertex");
             lElement.setAttribute("xmi:type", "uml:Pseudostate");
             lElement.setAttribute("xmi:id", getXmiId().toString());
@@ -116,50 +116,50 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    abstract class MURegionMachineShared extends MUNode {
+    abstract class MXURegionMachineShared extends MXUNode {
 
-        public MURegionMachineShared(IId aIid, MUNode aParent) {
+        public MXURegionMachineShared(IId aIid, MXUNode aParent) {
             super(aIid, aParent);
         }
 
-        public MUPseudoState addPseudoState(IPapyrusModel.PseudoKind aKind, IId aIid, String aName) {
-            MUPseudoState lMUPseudoState = new MUPseudoState(aIid, aKind, this);
+        public MXUPseudoState addPseudoState(IMdtUml2Model.PseudoKind aKind, IId aIid, String aName) {
+            MXUPseudoState lMUPseudoState = new MXUPseudoState(aIid, aKind, this);
             lMUPseudoState.appendToParentXml(getXmlNode());
             lMUPseudoState.setName(aName);
             return lMUPseudoState;
         }
 
-        public MURegionState addRegionState(IId aIid, String aName) {
-            MURegionState lMURegionState = new MURegionState(aIid, this);
+        public MXURegionState addRegionState(IId aIid, String aName) {
+            MXURegionState lMURegionState = new MXURegionState(aIid, this);
             lMURegionState.setName(aName);
             lMURegionState.appendToParentXml(getXmlNode());
             return lMURegionState;
         }
 
-        public MUSimpleState addState(IId aIid, String aName) {
-            MUSimpleState lMUSimpleState = new MUSimpleState(aIid, this);
+        public MXUSimpleState addState(IId aIid, String aName) {
+            MXUSimpleState lMUSimpleState = new MXUSimpleState(aIid, this);
             lMUSimpleState.setName(aName);
             lMUSimpleState.appendToParentXml(getXmlNode());
             return lMUSimpleState;
         }
 
-        public MUStateMachineState addSubMachine(IId aIid, String aName) {
-            MUStateMachineState lMUStateMachineState = new MUStateMachineState(aIid, this);
+        public MXUStateMachineState addSubMachine(IId aIid, String aName) {
+            MXUStateMachineState lMUStateMachineState = new MXUStateMachineState(aIid, this);
             lMUStateMachineState.setName(aName);
             lMUStateMachineState.appendToParentXml(getXmlNode());
             return lMUStateMachineState;
         }
 
-        public MUTransition addTransition(IId aSourceStateUuid, IId aTargetStateUuid, MUTrigger aMUTrigger) {
-            MUTransition lMUTransition = new MUTransition(aSourceStateUuid, aTargetStateUuid, aMUTrigger, this);
+        public MXUTransition addTransition(IId aSourceStateUuid, IId aTargetStateUuid, MXUTrigger aMUTrigger) {
+            MXUTransition lMUTransition = new MXUTransition(aSourceStateUuid, aTargetStateUuid, aMUTrigger, this);
             lMUTransition.appendToParentXml(getXmlNode());
             return lMUTransition;
         }
     }
 
-    class MURegionState extends MURegionMachineShared {
+    class MXURegionState extends MXURegionMachineShared {
 
-        MURegionState(IId aIid, MUNode aParent) {
+        MXURegionState(IId aIid, MXUNode aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
@@ -174,8 +174,8 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class MURootStateMachine extends MUStateMachineState {
-        public MURootStateMachine(IId aIid, MUNode aParent) {
+    class MXURootStateMachine extends MXUStateMachineState {
+        public MXURootStateMachine(IId aIid, MXUNode aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
@@ -190,9 +190,9 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class MUSimpleState extends MUNode {
+    class MXUSimpleState extends MXUNode {
 
-        MUSimpleState(IId aIid, MUNode aParent) {
+        MXUSimpleState(IId aIid, MXUNode aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
@@ -206,9 +206,9 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class MUStateMachineState extends MURegionMachineShared {
+    class MXUStateMachineState extends MXURegionMachineShared {
 
-        MUStateMachineState(IId aIid, MUNode aParent) {
+        MXUStateMachineState(IId aIid, MXUNode aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
@@ -222,11 +222,11 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class MUTransition extends MUNode {
-        private final MUTrigger fTrigger;
+    class MXUTransition extends MXUNode {
+        private final MXUTrigger fTrigger;
         Element fXmlNode;
 
-        MUTransition(IId aSourceStateUuid, IId aTargetStateUuid, MUTrigger aMUTrigger, MUNode aParent) {
+        MXUTransition(IId aSourceStateUuid, IId aTargetStateUuid, MXUTrigger aMUTrigger, MXUNode aParent) {
             super(new UuidId(), aParent);
             fTrigger = aMUTrigger;
             fXmlNode = createXmlElement();
@@ -234,7 +234,7 @@ class ModelUml extends ModelXmlBase {
             setTarget(aTargetStateUuid.toString());
         }
 
-        public MUNode appendToParentXml(Element aNode) {
+        public MXUNode appendToParentXml(Element aNode) {
             aNode.appendChild(fXmlNode);
             return this;
         }
@@ -267,12 +267,12 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class MUTrigger extends MUNode {
+    class MXUTrigger extends MXUNode {
 
         private final String                        fEvent;
-        private final IPapyrusModel.IPMTrigger.Type fType;
+        private final IMdtUml2Model.IMUTrigger.Type fType;
 
-        public MUTrigger(IId aId, Element aUmlModel, String aEvent, IPapyrusModel.IPMTrigger.Type aType) {
+        public MXUTrigger(IId aId, Element aUmlModel, String aEvent, IMdtUml2Model.IMUTrigger.Type aType) {
             super(aId, null);
             fEvent = aEvent;
             fType = aType;
@@ -309,21 +309,21 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    private final HashMap<IId, MUNode> fStateMap = new HashMap<>();
-    private MURootStateMachine fRootState;
-    private Element            fUmlModel;
+    private final HashMap<IId, MXUNode> fStateMap = new HashMap<>();
+    private MXURootStateMachine fRootState;
+    private Element             fUmlModel;
 
     public ModelUml() throws ParserConfigurationException {
         appendStaticXml(getDocument());
     }
 
-    public MUTrigger addTrigger(IId aId, String aEvent, IPapyrusModel.IPMTrigger.Type aType) {
-        return new MUTrigger(aId, fUmlModel, aEvent, aType);
+    public MXUTrigger addTrigger(IId aId, String aEvent, IMdtUml2Model.IMUTrigger.Type aType) {
+        return new MXUTrigger(aId, fUmlModel, aEvent, aType);
     }
 
-    public MURootStateMachine getRootState() {
+    public MXURootStateMachine getRootState() {
         if (fRootState == null) {
-            fRootState = new MURootStateMachine(new UuidId(), null);
+            fRootState = new MXURootStateMachine(new UuidId(), null);
             fStateMap.put(fRootState.getXmiId(), fRootState);
         }
         return fRootState;

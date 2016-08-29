@@ -1,4 +1,4 @@
-package net.workingdeveloper.java.spring.statemachine.dumper.papyrus_uml.impl.w3m;
+package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
