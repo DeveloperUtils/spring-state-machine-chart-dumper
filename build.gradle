@@ -6,7 +6,7 @@ group 'net.workingdeveloper.java.spring'
 
 jar {
     baseName = 'net.workingdeveloper.java.spring.statemachine.dumper'
-    version = '0.0.5-SNAPSHOT'
+    version = '0.1.0-SNAPSHOT'
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
