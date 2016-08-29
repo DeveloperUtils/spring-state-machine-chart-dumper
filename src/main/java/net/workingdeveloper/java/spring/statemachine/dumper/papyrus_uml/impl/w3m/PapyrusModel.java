@@ -79,7 +79,7 @@ public class PapyrusModel implements IPapyrusModel {
                             ((PMTrigger) aTrigger).getMUTrigger()
                     )
             );
-            lTransition.setName(aSourceState.getName() + "__" + aTargetState.getName());
+            lTransition.setName(aSourceState.getName() + "__" + aTargetState.getName() + "#" + aTrigger.getName());
 
             return lTransition;
         }
