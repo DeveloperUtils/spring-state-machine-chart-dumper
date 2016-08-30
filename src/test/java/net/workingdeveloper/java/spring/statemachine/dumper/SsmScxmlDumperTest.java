@@ -93,13 +93,20 @@ public class SsmScxmlDumperTest extends AbstractStateMachineTests {
             assertThat(lIdMap, not(hasItem(lId)));
             lIdMap.add(lId);
         }
+        lX = lDocument.getDocumentElement().getElementsByTagName("final");
+        for (int i = 0; i < lX.getLength(); i++) {
+            String lId = ((Element) lX.item(i)).getAttribute("id");
+            assertThat(lIdMap, not(hasItem(lId)));
+            lIdMap.add(lId);
+        }
         assertThat(
                 lIdMap,
                 containsInAnyOrder(
                         SMHierarch1.States.S1.toString(), SMHierarch1.States.S21.toString(),
                         SMHierarch1.States.S2.toString(), SMHierarch1.States.S2F.toString(),
                         SMHierarch1.States.S3I.toString(), SMHierarch1.States.S31.toString(),
-                        SMHierarch1.States.S3F.toString()
+                        SMHierarch1.States.S3F.toString(), SMHierarch1.States.S2I.toString(),
+                        SMHierarch1.States.SE.toString(), "S2r1", "S2r0"
                 )
         );
     }

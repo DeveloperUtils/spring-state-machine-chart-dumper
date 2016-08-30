@@ -19,21 +19,8 @@ public class SMHierarch1 {
     }
 
     public enum Events {
-        E_S1_SE, E_S1_1__S1_2, E_S1_S1, E_S1_S2, E_SI_S1
+        E_S1_SE, E_S1_1__S1_2, E_S1_S1, E_S1_S2, E_S31__S3F, E_S2__SE, E_S3I__S31, E_S21_S21, E_S21_S2F, E_S2I_S21, E_SI_S1
 
-    }
-
-    public StateMachine<String, String> buildUmlMachine(String aPath) throws Exception {
-        StateMachineBuilder.Builder<String, String> builder = StateMachineBuilder.builder();
-
-        builder.configureModel().withModel().factory(new UmlStateMachineModelFactory(
-                aPath
-        ));
-        builder.configureConfiguration()
-               .withConfiguration()
-               .taskExecutor(new SyncTaskExecutor())
-        ;
-        return builder.build();
     }
 
     public StateMachine<SMHierarch1.States, SMHierarch1.Events> buildMachine() throws Exception {
@@ -91,6 +78,7 @@ public class SMHierarch1 {
                .withStates()
                .initial(States.S1)
                .state(States.S2)
+               .end(States.SE)
                .and()
                .withStates()
                .parent(States.S2)
@@ -112,29 +100,46 @@ public class SMHierarch1 {
                .and()
                .withExternal()
                .source(States.S2I).target(States.S21)
-               .event(Events.E_S1_S1)
+               .event(Events.E_S2I_S21)
                .and()
                .withExternal()
                .source(States.S21).target(States.S2F)
-               .event(Events.E_S1_SE)
+               .event(Events.E_S21_S2F)
                .and()
                .withInternal()
                .source(States.S21)
-               .event(Events.E_S1_S1)
+               .event(Events.E_S21_S21)
                .and()
                .withExternal()
                .source(States.S3I).target(States.S31)
-               .event(Events.E_S1_1__S1_2)
+               .event(Events.E_S3I__S31)
+               .and()
+               .withExternal()
+               .source(States.S2).target(States.SE)
+               .event(Events.E_S2__SE)
                .and()
                .withExternal()
                .source(States.S31).target(States.S3F)
-               .event(Events.E_S1_1__S1_2)
+               .event(Events.E_S31__S3F)
                .and()
                .withInternal()
                .source(States.S31)
                .event(Events.E_S1_S1)
         ;
 
+        return builder.build();
+    }
+
+    public StateMachine<String, String> buildUmlMachine(String aPath) throws Exception {
+        StateMachineBuilder.Builder<String, String> builder = StateMachineBuilder.builder();
+
+        builder.configureModel().withModel().factory(new UmlStateMachineModelFactory(
+                aPath
+        ));
+        builder.configureConfiguration()
+               .withConfiguration()
+               .taskExecutor(new SyncTaskExecutor())
+        ;
         return builder.build();
     }
 }
