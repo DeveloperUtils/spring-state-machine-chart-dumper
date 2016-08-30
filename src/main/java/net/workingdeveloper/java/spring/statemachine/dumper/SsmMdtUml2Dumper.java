@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.region.Region;
 import org.springframework.statemachine.state.AbstractState;
+import org.springframework.statemachine.state.JoinPseudoState;
 import org.springframework.statemachine.state.RegionState;
 import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.transition.Transition;
@@ -129,10 +130,7 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                         );
                         break;
                     case JOIN:
-                        lStatePM = aParentState.addPseudoState(
-                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IMdtUml2Model.PseudoKind.JOIN
-                        );
+                        processPseudoStateJoin(aParentState,aStateSsm);
                         break;
                     case ENTRY:
                         lStatePM = aParentState.addPseudoState(
@@ -170,6 +168,18 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     logger.error("Here is wrong");
                 }
             }
+        }
+    }
+
+    private void processPseudoStateJoin(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
+        assert aStateSsm.getPseudoState() != null && aStateSsm.getPseudoState() instanceof JoinPseudoState;
+        JoinPseudoState<S,E> lPseudoState = (JoinPseudoState<S, E>) aStateSsm.getPseudoState();
+        IMdtUml2Model.IMUPseudoState lStatePM = aParentState.addPseudoState(
+                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                IMdtUml2Model.PseudoKind.JOIN
+        );
+        for (State<S, E> lJoinedState : lPseudoState.getJoins()) {
+
         }
     }
 
