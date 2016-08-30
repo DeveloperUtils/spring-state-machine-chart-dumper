@@ -1,4 +1,6 @@
-package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m;
+package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2;
+
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IId;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;

@@ -1,6 +1,8 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m;
 
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IId;
 import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IMdtUml2Model;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.UuidId;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

@@ -1,4 +1,4 @@
-package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m;
+package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2;
 
 /**
  * Created by Christoph Graupner on 8/23/16.

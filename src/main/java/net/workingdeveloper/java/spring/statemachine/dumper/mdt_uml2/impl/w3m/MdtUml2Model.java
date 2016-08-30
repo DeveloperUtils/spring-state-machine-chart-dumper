@@ -1,6 +1,9 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m;
 
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IId;
 import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IMdtUml2Model;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.Sha1Id;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.UuidId;
 import org.springframework.statemachine.transition.TransitionKind;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -76,10 +79,14 @@ public class MdtUml2Model implements IMdtUml2Model {
                     fUmlState.addTransition(
                             aSourceState.getUuid(),
                             aTargetState.getUuid(),
-                            ((MUTrigger) aTrigger).getMUTrigger()
+                            aTrigger != null ? ((MUTrigger) aTrigger).getMUTrigger() : null
                     )
             );
-            lTransition.setName(aSourceState.getName() + "__" + aTargetState.getName() + "#" + aTrigger.getName());
+            String lTransitionName = aSourceState.getName() + "__" + aTargetState.getName();
+            if (aTrigger != null) {
+                lTransitionName += "#" + aTrigger.getName();
+            }
+            lTransition.setName(lTransitionName);
 
             return lTransition;
         }

@@ -1,6 +1,5 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2;
 
-import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m.IId;
 import org.springframework.statemachine.transition.TransitionKind;
 
 import java.io.File;

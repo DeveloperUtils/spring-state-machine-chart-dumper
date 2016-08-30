@@ -56,7 +56,7 @@ public class SsmMdtUml2DumperTest {
 
         sut.dump();
         System.out.println(sut.asString());
-        sut.save(new File("/home/christoph/workspace/papyrus/test/test_model"));
+        sut.save(new File(getBuildPath() + "/test_model_all"));
     }
 
     @Test
@@ -76,6 +76,10 @@ public class SsmMdtUml2DumperTest {
 
         sut.dump();
         System.out.println(sut.asString());
-        sut.save(new File("/home/christoph/workspace/papyrus/test/test_model"));
+        sut.save(new File(getBuildPath() + "/test_model_join"));
+    }
+
+    private String getBuildPath() {
+        return "build/test-results/dumps";
     }
 }
