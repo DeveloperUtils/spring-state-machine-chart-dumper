@@ -79,6 +79,16 @@ public class SsmMdtUml2DumperTest {
         sut.save(new File(getBuildPath() + "/test_model_join"));
     }
 
+    @Test
+    public void dumpForkJoin() throws Exception {
+        StateMachine<JoinSM.Config14.States2, JoinSM.Config14.Events>     lSM = build(new JoinSM.Config14());
+        SsmMdtUml2Dumper<JoinSM.Config14.States2, JoinSM.Config14.Events> sut = new SsmMdtUml2Dumper<>(lSM);
+
+        sut.dump();
+        System.out.println(sut.asString());
+        sut.save(new File(getBuildPath() + "/test_model_forkjoin"));
+    }
+
     private String getBuildPath() {
         return "build/test-results/dumps";
     }

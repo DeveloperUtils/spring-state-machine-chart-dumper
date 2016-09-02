@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.region.Region;
-import org.springframework.statemachine.state.AbstractState;
-import org.springframework.statemachine.state.JoinPseudoState;
-import org.springframework.statemachine.state.RegionState;
-import org.springframework.statemachine.state.State;
+import org.springframework.statemachine.state.*;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.statemachine.transition.TransitionKind;
 import org.springframework.statemachine.trigger.TimerTrigger;
@@ -106,12 +103,6 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                                 IMdtUml2Model.PseudoKind.DEEP_HISTORY
                         );
                         break;
-                    case FORK:
-                        lStatePM = aParentState.addPseudoState(
-                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IMdtUml2Model.PseudoKind.FORK
-                        );
-                        break;
                     case INITIAL:
                         lStatePM = aParentState.addPseudoState(
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
@@ -129,6 +120,9 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
                                 IMdtUml2Model.PseudoKind.JUNCTION
                         );
+                        break;
+                    case FORK:
+                        processPseudoStateFork(aParentState, aStateSsm);
                         break;
                     case JOIN:
                         processPseudoStateJoin(aParentState, aStateSsm);
@@ -168,6 +162,24 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                 } else {
                     logger.error("Here is wrong");
                 }
+            }
+        }
+    }
+
+    private void processPseudoStateFork(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
+        assert aStateSsm.getPseudoState() != null && aStateSsm.getPseudoState() instanceof ForkPseudoState;
+        ForkPseudoState<S, E> lPseudoState = (ForkPseudoState<S, E>) aStateSsm.getPseudoState();
+        IMdtUml2Model.IMUPseudoState lStatePM = aParentState.addPseudoState(
+                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                IMdtUml2Model.PseudoKind.FORK
+        );
+        for (State<S, E> lForkedState : lPseudoState.getForks()) {
+            IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lForkedState));
+            if (lFound != null) {
+                aParentState.addTransition(lStatePM, lFound, TransitionKind.EXTERNAL, null);
+            } else {
+                //TODO: create deferred transition
+                logger.error("No state found " + lForkedState);
             }
         }
     }
