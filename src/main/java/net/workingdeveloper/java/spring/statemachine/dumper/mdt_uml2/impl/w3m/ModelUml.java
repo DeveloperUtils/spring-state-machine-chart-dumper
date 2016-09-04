@@ -342,6 +342,7 @@ class ModelUml extends ModelXmlBase {
 
         private final IMdtUml2Model.IMUTrigger.Type fType;
         private       String                        fEvent;
+        private       Element                       fSignal;
 
         public MXUTrigger(IId aId, Element aUmlModel, String aEvent, IMdtUml2Model.IMUTrigger.Type aType) {
             super(aId, null);
@@ -351,18 +352,24 @@ class ModelUml extends ModelXmlBase {
         }
 
         @Override
+        public String getName() {
+            return fEvent;
+        }
+
+        @Override
         public void setName(String aName) {
             fEvent = aName;
-            super.setName(aName);
+            fXmlNode.setAttribute("name", fEvent + "Event");
+            fSignal.setAttribute("name", fEvent);
         }
 
         private void createXmlElement(Element aModel) {
-            Element lSignal = createElement("packagedElement");
-            lSignal.setAttribute("xmi:type", "uml:Signal");
+            fSignal = createElement("packagedElement");
+            fSignal.setAttribute("xmi:type", "uml:Signal");
             String lValue = new UuidId().toString();
-            lSignal.setAttribute("xmi:id", lValue);
-            lSignal.setAttribute("name", fEvent);
-            aModel.appendChild(lSignal);
+            fSignal.setAttribute("xmi:id", lValue);
+            fSignal.setAttribute("name", fEvent);
+            aModel.appendChild(fSignal);
             fXmlNode = createElement("packagedElement");
             fXmlNode.setAttribute("xmi:type", "uml:SignalEvent");
             fXmlNode.setAttribute("xmi:id", getXmiId().toString());
