@@ -13,9 +13,13 @@ Library to Dump/draw a state machine chart out of a [Spring Statemachine](http:/
 + [x] Regions dumped
 + [x] [MDT UML2](https://projects.eclipse.org/projects/modeling.mdt.uml2) output
 + [x] SCXML (not complete mapping)
++ [x] Guards dumped
++ [x] Pseudostate JOIN dumped
++ [x] Pseudostate FORK dumped
++ [x] Pseudostate CHOICE dumped
++ [x] Pseudostate JUNCTION dumped
 
 - [ ] Actions not dumped
-- [ ] Guards not dumped
 - [ ] Time triggers not dumped
 - [ ] Lots of the Pseudostates not dumped with their specialization
 - [ ] Tests are not yet real tests
