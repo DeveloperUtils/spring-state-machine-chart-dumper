@@ -5,6 +5,7 @@ import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IMdtUml2Mod
 import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.UuidId;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -17,7 +18,6 @@ import java.util.HashMap;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 class ModelUml extends ModelXmlBase {
-
     abstract class MXUNode {
         IId     fID;
         MXUNode fParent;
@@ -64,6 +64,21 @@ class ModelUml extends ModelXmlBase {
         }
 
         abstract Element createXmlElement();
+
+        /*
+        <ownedComment xmi:id="_d0GIsHKBEea1hrJUR6Bqog" annotatedElement="4e4a4981-dd3d-4273-93d6-39e84ab04bb5">
+          <body>this is a comment</body>
+        </ownedComment>
+         */
+        void addComment(String aCommentText) {
+            Element lCommentElement = createElement("ownedComment");
+            lCommentElement.setAttribute("xmi:id", new UuidId().toString());
+            lCommentElement.setAttribute("annotatedElement", getXmiId().toString());
+            fXmlNode.appendChild(lCommentElement);
+            Element lCommentText = createElement("body");
+            lCommentElement.appendChild(lCommentText);
+            lCommentText.appendChild(createTextNode(aCommentText));
+        }
     }
 
     class MXUPseudoState extends MXUNode {
@@ -226,7 +241,6 @@ class ModelUml extends ModelXmlBase {
 
     class MXUTransition extends MXUNode {
         private final MXUTrigger fTrigger;
-        Element fXmlNode;
 
         MXUTransition(IId aSourceStateUuid, IId aTargetStateUuid, MXUTrigger aMUTrigger, MXUNode aParent) {
             super(new UuidId(), aParent);
@@ -334,6 +348,10 @@ class ModelUml extends ModelXmlBase {
     @Override
     public void save(File aFilename) throws IOException {
         super.save(new File(aFilename.getAbsolutePath() + ".uml"));
+    }
+
+    Text createTextNode(String data) {
+        return getDocument().createTextNode(data);
     }
 
     private void appendStaticXml(Document lDoc) {

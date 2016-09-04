@@ -176,14 +176,18 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     .get(lPseudoState);
 
             State<S, E> lNextState;
+            int         count = 0;
             for (JunctionPseudoState.JunctionStateData<S, E> lJunctionStateData : lFieldChoice) {
+                count++;
                 lNextState = lJunctionStateData.getState();
                 if (lJunctionStateData.getGuard() != null) {
                     //TODO add guard to transition
                 }
                 IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lNextState));
                 if (lFound != null) {
-                    aParentState.addTransition(lStatePM, lFound, TransitionKind.EXTERNAL, null);
+                    IMdtUml2Model.IMUTransition lTransition = aParentState.addTransition(
+                            lStatePM, lFound, TransitionKind.EXTERNAL, null);
+                    lTransition.addComment("Connection " + lStatePM.getName() + "#Junction" + count);
                 } else {
                     //TODO: create deferred transition
                     logger.error("No state found " + lNextState);
@@ -216,14 +220,18 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     .get(lPseudoState);
 
             State<S, E> lNextState;
+            int         count = 0;
             for (ChoicePseudoState.ChoiceStateData<S, E> lChoiceStateData : lFieldChoice) {
+                count++;
                 lNextState = lChoiceStateData.getState();
                 if (lChoiceStateData.getGuard() != null) {
                     //TODO add guard to transition
                 }
                 IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lNextState));
                 if (lFound != null) {
-                    aParentState.addTransition(lStatePM, lFound, TransitionKind.EXTERNAL, null);
+                    IMdtUml2Model.IMUTransition lTransition = aParentState.addTransition(
+                            lStatePM, lFound, TransitionKind.EXTERNAL, null);
+                    lTransition.addComment("Connection " + lStatePM.getName() + "#Choice" + count);
                 } else {
                     //TODO: create deferred transition
                     logger.error("No state found " + lNextState);

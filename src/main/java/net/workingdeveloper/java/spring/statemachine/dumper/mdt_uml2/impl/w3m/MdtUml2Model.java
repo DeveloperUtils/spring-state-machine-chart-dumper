@@ -19,6 +19,29 @@ import java.util.HashMap;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 public class MdtUml2Model implements IMdtUml2Model {
+    abstract class MUNode<UMLMODEL extends ModelUml.MXUNode> implements IMUNode {
+
+        UMLMODEL fUmlState;
+
+        MUNode(UMLMODEL aUmlState) {
+            fUmlState = aUmlState;
+        }
+
+        @Override
+        public <T extends IMUNode> T addComment(String aS) {
+            fUmlState.addComment(aS);
+            return (T) this;
+        }
+
+        public String getName() {
+            return fUmlState.getName();
+        }
+
+        public IId getUuid() {
+            return fUmlState.getXmiId();
+        }
+    }
+
     class MUPseudoState extends MUState<ModelUml.MXUNode, MURegionMachineSharedState> implements IMUPseudoState {
         PseudoKind fKind;
 
@@ -112,26 +135,17 @@ public class MdtUml2Model implements IMdtUml2Model {
         }
     }
 
-    abstract class MUState<UMLMODEL extends ModelUml.MXUNode, PARENT extends MUState> {
-        PARENT   fParent;
-        UMLMODEL fUmlState;
+    abstract class MUState<UMLMODEL extends ModelUml.MXUNode, PARENT extends MUState> extends MUNode<UMLMODEL> {
+        PARENT fParent;
 
         MUState(UMLMODEL aUmlState, PARENT aParent) {
-            fUmlState = aUmlState;
+            super(aUmlState);
             fParent = aParent;
             fStateMap.put(aUmlState.getXmiId(), this);
         }
 
         public String getId() {
             return fUmlState.getId();
-        }
-
-        public String getName() {
-            return fUmlState.getName();
-        }
-
-        public IId getUuid() {
-            return fUmlState.getXmiId();
         }
     }
 
@@ -148,60 +162,59 @@ public class MdtUml2Model implements IMdtUml2Model {
         }
     }
 
-    class MUTransition implements IMUTransition {
-        ModelUml.MXUTransition fMUTransition;
-        IMURegionState         fParent;
+    class MUTransition extends MUNode<ModelUml.MXUTransition> implements IMUTransition {
+        IMURegionState fParent;
 
         public MUTransition(IMURegionState aParent, ModelUml.MXUTransition aMUTransition) {
+            super(aMUTransition);
             fParent = aParent;
-            fMUTransition = aMUTransition;
+        }
+
+        @Override
+        public String getName() {
+            return fUmlState.getName();
+        }
+
+        @Override
+        public IId getUuid() {
+            return fUmlState.getXmiId();
         }
 
         @Override
         public IMUTransition setName(String aName) {
-            fMUTransition.setName(aName);
+            fUmlState.setName(aName);
             return this;
         }
 
         @Override
         public IMUTransition setSource(IMUState aSource) {
-            fMUTransition.setSource(aSource.getId());
+            fUmlState.setSource(aSource.getId());
             return this;
         }
 
         @Override
         public IMUTransition setTarget(IMUState aTarget) {
-            fMUTransition.setTarget(aTarget.getId());
+            fUmlState.setTarget(aTarget.getId());
             return this;
         }
     }
 
-    class MUTrigger implements IMUTrigger {
-        ModelUml.MXUTrigger fMUTrigger;
+    class MUTrigger extends MUNode<ModelUml.MXUTrigger> implements IMUTrigger {
 
         public MUTrigger(String aEvent, Type aType) {
+            super(null);
             IId lId;
             try {
                 lId = new Sha1Id(aEvent);
             } catch (NoSuchAlgorithmException | UnsupportedEncodingException aE) {
                 lId = new UuidId();
             }
-            fMUTrigger = fUml.addTrigger(lId, aEvent, aType);
+            fUmlState = fUml.addTrigger(lId, aEvent, aType);
             fTriggerMap.put(aEvent, this);
         }
 
-        @Override
-        public IId getId() {
-            return fMUTrigger.getXmiId();
-        }
-
-        @Override
-        public String getName() {
-            return fMUTrigger.getName();
-        }
-
         ModelUml.MXUTrigger getMUTrigger() {
-            return fMUTrigger;
+            return fUmlState;
         }
     }
 

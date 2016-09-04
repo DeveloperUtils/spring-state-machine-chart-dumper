@@ -21,13 +21,16 @@ public interface IMdtUml2Model {
         FINAL
     }
 
-    interface IMUState {
-
-        String getId();
+    interface IMUNode {
+        <T extends IMUNode> T addComment(String aS);
 
         String getName();
 
         IId getUuid();
+    }
+
+    interface IMUState extends IMUNode {
+        String getId();
     }
 
     interface IMURegionState extends IMUState {
@@ -80,7 +83,8 @@ public interface IMdtUml2Model {
         IMURegionState addRegion(IId aUUID, String aName);
     }
 
-    interface IMUTransition {
+    interface IMUTransition extends IMUNode {
+
         IMUTransition setName(String aName);
 
         IMUTransition setSource(IMUState aState);
@@ -88,12 +92,10 @@ public interface IMdtUml2Model {
         IMUTransition setTarget(IMUState aTarget);
     }
 
-    interface IMUTrigger {
+    interface IMUTrigger extends IMUNode {
         enum Type {
             TIMER, EVENT
         }
-
-        IId getId();
 
         String getName();
     }
