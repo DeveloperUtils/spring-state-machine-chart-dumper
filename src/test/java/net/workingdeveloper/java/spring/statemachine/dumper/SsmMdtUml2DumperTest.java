@@ -57,7 +57,7 @@ public class SsmMdtUml2DumperTest {
     }
 
     @Test
-    public void dumpChoiceJunction() throws Exception {
+    public void dumpChoice() throws Exception {
         StateMachine<ChoiceJunctionSSM.ConfigChoice.States, ChoiceJunctionSSM.ConfigChoice.Events> lSM = build(
                 new ChoiceJunctionSSM.ConfigChoice());
         SsmMdtUml2Dumper<ChoiceJunctionSSM.ConfigChoice.States, ChoiceJunctionSSM.ConfigChoice.Events> sut = new SsmMdtUml2Dumper<>(
@@ -65,7 +65,7 @@ public class SsmMdtUml2DumperTest {
 
         sut.dump();
         System.out.println(sut.asString());
-        sut.save(new File(getBuildPath() + "/test_model_choicejunction"));
+        sut.save(new File(getBuildPath() + "/test_model_choice"));
     }
 
     @Test
@@ -96,6 +96,18 @@ public class SsmMdtUml2DumperTest {
         sut.dump();
         System.out.println(sut.asString());
         sut.save(new File(getBuildPath() + "/test_model_join"));
+    }
+
+    @Test
+    public void dumpJunction() throws Exception {
+        StateMachine<ChoiceJunctionSSM.ConfigJunction.States, ChoiceJunctionSSM.ConfigJunction.Events> lSM = build(
+                new ChoiceJunctionSSM.ConfigJunction());
+        SsmMdtUml2Dumper<ChoiceJunctionSSM.ConfigJunction.States, ChoiceJunctionSSM.ConfigJunction.Events> sut = new SsmMdtUml2Dumper<>(
+                lSM);
+
+        sut.dump();
+        System.out.println(sut.asString());
+        sut.save(new File(getBuildPath() + "/test_model_junction"));
     }
 
     private String getBuildPath() {

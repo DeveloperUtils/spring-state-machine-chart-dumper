@@ -115,10 +115,7 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                         processPseudoStateChoice(aParentState, aStateSsm);
                         break;
                     case JUNCTION:
-                        lStatePM = aParentState.addPseudoState(
-                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IMdtUml2Model.PseudoKind.JUNCTION
-                        );
+                        processPseudoStateJunction(aParentState, aStateSsm);
                         break;
                     case FORK:
                         processPseudoStateFork(aParentState, aStateSsm);
@@ -165,6 +162,46 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         }
     }
 
+    private void processPseudoStateJunction(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
+        assert aStateSsm.getPseudoState() != null && aStateSsm.getPseudoState() instanceof JunctionPseudoState;
+        JunctionPseudoState<S, E> lPseudoState = (JunctionPseudoState<S, E>) aStateSsm.getPseudoState();
+        IMdtUml2Model.IMUPseudoState lStatePM = aParentState.addPseudoState(
+                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                IMdtUml2Model.PseudoKind.JUNCTION
+        );
+        try {
+            Field lFieldChoices = JunctionPseudoState.class.getDeclaredField("junctions");
+            lFieldChoices.setAccessible(true);
+            List<JunctionPseudoState.JunctionStateData<S, E>> lFieldChoice = (List<JunctionPseudoState.JunctionStateData<S, E>>) lFieldChoices
+                    .get(lPseudoState);
+
+            State<S, E> lNextState;
+            for (JunctionPseudoState.JunctionStateData<S, E> lJunctionStateData : lFieldChoice) {
+                lNextState = lJunctionStateData.getState();
+                if (lJunctionStateData.getGuard() != null) {
+                    //TODO add guard to transition
+                }
+                IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lNextState));
+                if (lFound != null) {
+                    aParentState.addTransition(lStatePM, lFound, TransitionKind.EXTERNAL, null);
+                } else {
+                    //TODO: create deferred transition
+                    logger.error("No state found " + lNextState);
+                }
+            }
+        } catch (NoSuchFieldException aE) {
+            logger.error(
+                    "Class JunctionPseudoState doesn't have field 'junctions'. Compatible version of spring state machine used?",
+                    aE
+            );
+        } catch (IllegalAccessException aE) {
+            logger.error(
+                    "Can't access field 'junctions' of class 'JunctionPseudoState'. Compatible version of spring state machine used?",
+                    aE
+            );
+        }
+    }
+
     private void processPseudoStateChoice(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
         assert aStateSsm.getPseudoState() != null && aStateSsm.getPseudoState() instanceof ChoicePseudoState;
         ChoicePseudoState<S, E> lPseudoState = (ChoicePseudoState<S, E>) aStateSsm.getPseudoState();
@@ -194,12 +231,12 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
             }
         } catch (NoSuchFieldException aE) {
             logger.error(
-                    "Class ChoicePseudoState doesn't have field 'choice'. Compatible version of spring state machine used?",
+                    "Class ChoicePseudoState doesn't have field 'choices'. Compatible version of spring state machine used?",
                     aE
             );
         } catch (IllegalAccessException aE) {
             logger.error(
-                    "Can't access field 'choice' of class 'ChoicePseudoState'. Compatible version of spring state machine used?",
+                    "Can't access field 'choices' of class 'ChoicePseudoState'. Compatible version of spring state machine used?",
                     aE
             );
         }
