@@ -45,7 +45,7 @@ class ModelUml extends ModelXmlBase {
         @Override
         public void setName(String aName) {
             super.setName(aName);
-            fSpecificationXml.setAttribute("name", "spec" + aName);
+            fSpecificationXml.setAttribute("name", "spec#" + aName);
         }
 
         void setParent(MXUNode aParent) {

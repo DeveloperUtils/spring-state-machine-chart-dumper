@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,9 +35,11 @@ import java.util.Map;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
-    private static final Logger logger = LoggerFactory.getLogger(SsmMdtUml2Dumper.class);
+    private static final Logger  logger                         = LoggerFactory.getLogger(SsmMdtUml2Dumper.class);
+    private              boolean fGuardGuessFromEnclosingMethod = true;
     private IMdtUml2Model fModel;
-    private Map<String, IId> fUUIDMap = new HashMap<>();
+    private String           fNamingMethodGuard = "getName";
+    private Map<String, IId> fUUIDMap           = new HashMap<>();
 
     public SsmMdtUml2Dumper(StateMachine<S, E> aStateMachine) {
         super(aStateMachine);
@@ -57,6 +61,22 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         processMachine(fModel, getStateMachine());
 
         return (T) this;
+    }
+
+    public String getNamingMethodGuard() {
+        return fNamingMethodGuard;
+    }
+
+    public void setNamingMethodGuard(String aNamingMethodGuard) {
+        fNamingMethodGuard = aNamingMethodGuard;
+    }
+
+    public boolean isGuardGuessFromEnclosingMethod() {
+        return fGuardGuessFromEnclosingMethod;
+    }
+
+    public void setGuardGuessFromEnclosingMethod(boolean aGuardGuessFromEnclosingMethod) {
+        fGuardGuessFromEnclosingMethod = aGuardGuessFromEnclosingMethod;
     }
 
     @Override
@@ -183,8 +203,8 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
             int         count = 0;
             for (JunctionPseudoState.JunctionStateData<S, E> lJunctionStateData : lFieldChoice) {
                 count++;
-                State<S, E> lSsmNextState   = lJunctionStateData.getState();
-                final Guard<S, E> lSsmGuard = lJunctionStateData.getGuard();
+                State<S, E>       lSsmNextState = lJunctionStateData.getState();
+                final Guard<S, E> lSsmGuard     = lJunctionStateData.getGuard();
                 handlePseudoStateJunction("Junction", aParentState, lStatePM, lSsmNextState, lSsmGuard, count);
             }
         } catch (NoSuchFieldException aE) {
@@ -245,10 +265,43 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     aMUPseudoState, lFound, TransitionKind.EXTERNAL, null);
             lTransition.addComment("Connection " + aMUPseudoState.getName() + "#" + aType + aCount);
             if (aSsmGuard != null) {
+                final Class<? extends Guard> lGuardClass = aSsmGuard.getClass();
                 IMdtUml2Model.IMUGuard lGuard = lTransition.setGuard(
-                        new Sha1Id(aSsmGuard.getClass()));
-                lGuard.setName(aMUPseudoState.getName() + "#" + aType + aCount);
-                lGuard.addBody(aMUPseudoState.getName() + "#" + aType + aCount);
+                        new Sha1Id(lGuardClass));
+                String lGuardName = aMUPseudoState.getName()
+                        + "__" + aSsmNextState.getId().toString()
+                        + "#" + aType + aCount;
+
+                try {
+                    Method lMethod = lGuardClass.getMethod(getNamingMethodGuard());
+                    lMethod.setAccessible(true);
+                    Object lRet       = lMethod.invoke(aSsmGuard);
+                    String lGuardBody = lRet.toString();
+                    lGuard.addBody(lGuardBody);
+                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException aE) {
+                    //silently ignore exception as this is optional naming
+                    String lBody = null;
+                    if (isGuardGuessFromEnclosingMethod() && (
+                            lGuardClass.isAnonymousClass()
+                                    || lGuardClass.isLocalClass()
+                    )) {
+                        try {
+                            Method lMethod = lGuardClass.getEnclosingMethod();
+                            if (lMethod != null)
+                                lBody = lMethod.getName();
+                        } catch (SecurityException aE1) {
+                            //silently ignore exception as this is optional naming
+                        }
+                    }
+                    if (lBody == null && !"".equals(lGuardClass.getSimpleName())) {
+                        lBody = lGuardClass.getSimpleName();
+                    }
+                    if (lBody != null) {
+                        lGuard.addBody(lBody);
+                    }
+                }
+                lGuard.setName(lGuardName);
+                lGuard.addBody(lGuardClass.toString());
             }
         } else {
             //TODO: create deferred transition

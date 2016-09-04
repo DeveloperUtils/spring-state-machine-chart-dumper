@@ -68,6 +68,10 @@ public class ChoiceJunctionSSM {
                 public boolean evaluate(StateContext<States, Events> context) {
                     return false;
                 }
+
+                public String getName() {
+                    return "s2Guard.getName()";
+                }
             };
         }
 
@@ -89,6 +93,14 @@ public class ChoiceJunctionSSM {
 
         public enum Events {S3__SF, S4__SF, SI__S1, S5__SF, S2__SF}
 
+        public class NamedGuard implements Guard<States, Events> {
+
+            @Override
+            public boolean evaluate(StateContext<States, Events> context) {
+                return false;
+            }
+        }
+
         @Override
         public void configure(StateMachineStateConfigurer<States, Events> states) throws Exception {
             states
@@ -107,7 +119,7 @@ public class ChoiceJunctionSSM {
                     .source(States.S1)
                     .first(States.S2, s2Guard())
                     .then(States.S3, s3Guard())
-                    .then(States.S4, s3Guard())
+                    .then(States.S4, new NamedGuard())
                     .last(States.S5);
             transitions
                     .withExternal()
@@ -137,6 +149,10 @@ public class ChoiceJunctionSSM {
                 @Override
                 public boolean evaluate(StateContext<States, Events> context) {
                     return false;
+                }
+
+                public String getName() {
+                    return "s2Guard.getName()";
                 }
             };
         }
