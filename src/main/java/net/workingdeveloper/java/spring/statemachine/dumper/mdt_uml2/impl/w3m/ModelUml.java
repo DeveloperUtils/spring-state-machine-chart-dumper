@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Christoph Graupner on 8/22/16.
@@ -18,6 +19,63 @@ import java.util.HashMap;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 class ModelUml extends ModelXmlBase {
+    class MXUGuard extends MXUNode {
+        Element fSpecificationXml;
+
+        MXUGuard(IId aIid, MXUNode aParent) {
+            super(aIid, aParent);
+            fGuardMap.put(aIid, this);
+            fXmlNode = createXmlElement();
+        }
+
+        public MXUGuard addBody(String aBody) {
+            Element lBody = createElement("body");
+            fSpecificationXml.appendChild(lBody);
+            lBody.appendChild(createTextNode(aBody));
+            return this;
+        }
+
+        public MXUGuard addLanguage(String aLanguageName) {
+            Element lLanguage = createElement("language");
+            fSpecificationXml.appendChild(lLanguage);
+            lLanguage.appendChild(createTextNode(aLanguageName));
+            return this;
+        }
+
+        @Override
+        public void setName(String aName) {
+            super.setName(aName);
+            fSpecificationXml.setAttribute("name", "spec" + aName);
+        }
+
+        void setParent(MXUNode aParent) {
+            fParent = aParent;
+        }
+
+        @Override
+        Element createXmlElement() {
+    /*
+        <ownedRule xmi:id="_T53EcHKSEea1hrJUR6Bqog" name="thisIsAGuard">
+          <specification xmi:type="uml:OpaqueExpression" xmi:id="_XOT3wHKSEea1hrJUR6Bqog" name="myOne">
+            <language>Bean</language>
+            <language>Java</language>
+            <body>if x = y</body>
+          </specification>
+        </ownedRule>
+
+     */
+            Element lRule = createElement("ownedRule");
+            lRule.setAttribute("xmi:id", getXmiId().toString());
+            fSpecificationXml = createElement("specification");
+            lRule.appendChild(fSpecificationXml);
+            fSpecificationXml.setAttribute("xmi:type", "uml:OpaqueExpression");
+            fSpecificationXml.setAttribute("xmi:id", new UuidId().toString());
+            fSpecificationXml.setAttribute("name", "spec");
+            addLanguage("bean");
+            return lRule;
+        }
+    }
+
     abstract class MXUNode {
         IId     fID;
         MXUNode fParent;
@@ -271,6 +329,13 @@ class ModelUml extends ModelXmlBase {
             }
             return lRet;
         }
+
+        MXUTransition setGuard(MXUGuard aGuard) {
+            aGuard.appendToParentXml(fXmlNode);
+            aGuard.setParent(this);
+            fXmlNode.setAttribute("guard", aGuard.getXmiId().toString());
+            return this;
+        }
     }
 
     class MXUTrigger extends MXUNode {
@@ -312,7 +377,9 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    private final HashMap<IId, MXUNode> fStateMap = new HashMap<>();
+    private final Map<IId, MXUGuard> fGuardMap = new HashMap<>();
+
+    private final Map<IId, MXUNode> fStateMap = new HashMap<>();
     private MXURootStateMachine fRootState;
     private Element             fUmlModel;
 
@@ -322,6 +389,14 @@ class ModelUml extends ModelXmlBase {
 
     public MXUTrigger addTrigger(IId aId, String aEvent, IMdtUml2Model.IMUTrigger.Type aType) {
         return new MXUTrigger(aId, fUmlModel, aEvent, aType);
+    }
+
+    public MXUGuard createGuard(IId aGuardId) {
+        return new MXUGuard(aGuardId, null);
+    }
+
+    public MXUGuard findGuard(IId aId) {
+        return fGuardMap.get(aId);
     }
 
     public MXURootStateMachine getRootState() {

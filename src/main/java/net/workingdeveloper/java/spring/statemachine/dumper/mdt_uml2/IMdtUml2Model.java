@@ -24,9 +24,11 @@ public interface IMdtUml2Model {
     interface IMUNode {
         <T extends IMUNode> T addComment(String aS);
 
+        IId getId();
+
         String getName();
 
-        IId getId();
+        <T extends IMUNode> T setName(String aName);
     }
 
     interface IMUState extends IMUNode {
@@ -43,8 +45,6 @@ public interface IMdtUml2Model {
         IMUStateMachine addSubMachine(IId aUUID, String aId);
 
         IMUTransition addTransition(IMUState aSourceState, IMUState aTargetState, TransitionKind aKind, IMUTrigger aTrigger);
-
-        IMURegionState setName(String aName);
     }
 
     interface IMUPseudoState extends IMUState {
@@ -84,6 +84,8 @@ public interface IMdtUml2Model {
 
     interface IMUTransition extends IMUNode {
 
+        IMUGuard setGuard(IId aGuardId);
+
         IMUTransition setName(String aName);
 
         IMUTransition setSource(IMUState aState);
@@ -95,8 +97,12 @@ public interface IMdtUml2Model {
         enum Type {
             TIMER, EVENT
         }
+    }
 
-        String getName();
+    interface IMUGuard extends IMUNode {
+        IMUGuard addBody(String aBody);
+
+        IMUGuard addLanguage(String aLanguageName);
     }
 
     IMUTrigger addTrigger(String aEvent, IMUTrigger.Type aType);

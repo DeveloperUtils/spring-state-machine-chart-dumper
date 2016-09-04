@@ -19,6 +19,25 @@ import java.util.HashMap;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 public class MdtUml2Model implements IMdtUml2Model {
+    class MUGuard extends MUNode<ModelUml.MXUGuard> implements IMUGuard {
+
+        MUGuard(ModelUml.MXUGuard aUmlState) {
+            super(aUmlState);
+        }
+
+        @Override
+        public IMUGuard addBody(String aBody) {
+            fUmlState.addBody(aBody);
+            return this;
+        }
+
+        @Override
+        public IMUGuard addLanguage(String aLanguageName) {
+            fUmlState.addLanguage(aLanguageName);
+            return this;
+        }
+    }
+
     abstract class MUNode<UMLMODEL extends ModelUml.MXUNode> implements IMUNode {
 
         UMLMODEL fUmlState;
@@ -33,16 +52,25 @@ public class MdtUml2Model implements IMdtUml2Model {
             return (T) this;
         }
 
+        public IId getId() {
+            return fUmlState.getXmiId();
+        }
+
         public String getName() {
             return fUmlState.getName();
         }
 
-        public IId getId() {
-            return fUmlState.getXmiId();
+        @Override
+        public <T extends IMUNode> T setName(String aName) {
+            fUmlState.setName(aName);
+            return (T) this;
         }
     }
 
-    class MUPseudoState extends MUState<ModelUml.MXUNode, MURegionMachineSharedState> implements IMUPseudoState {
+    class MUPseudoState extends MUState<ModelUml.MXUNode, MURegionMachineSharedState>
+            implements IMUPseudoState, IMUPChoiceState, IMUPDeppHistoryState, IMUPEntryPointState,
+            IMUPExitPointState, IMUPForkState, IMUPInitialState, IMUPJoinState,
+            IMUPJunctionState, IMUPShallowHistoryState {
         PseudoKind fKind;
 
         public MUPseudoState(ModelUml.MXUNode aUmlMXUNode, MURegionMachineSharedState aParent) {
@@ -167,13 +195,24 @@ public class MdtUml2Model implements IMdtUml2Model {
         }
 
         @Override
+        public IId getId() {
+            return fUmlState.getXmiId();
+        }
+
+        @Override
         public String getName() {
             return fUmlState.getName();
         }
 
         @Override
-        public IId getId() {
-            return fUmlState.getXmiId();
+        public IMUGuard setGuard(IId aGuardId) {
+            ModelUml.MXUGuard lGuard = fUml.findGuard(aGuardId);
+            if (lGuard == null) {
+                lGuard = fUml.createGuard(aGuardId);
+            }
+            fUmlState.setGuard(lGuard);
+            IMUGuard lIMUGuard = new MUGuard(lGuard);
+            return lIMUGuard;
         }
 
         @Override

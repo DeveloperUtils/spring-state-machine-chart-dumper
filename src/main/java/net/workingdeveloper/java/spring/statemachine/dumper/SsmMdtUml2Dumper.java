@@ -2,11 +2,13 @@ package net.workingdeveloper.java.spring.statemachine.dumper;
 
 import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IId;
 import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IMdtUml2Model;
+import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.Sha1Id;
 import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.UuidId;
 import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m.MdtUml2Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.guard.Guard;
 import org.springframework.statemachine.region.Region;
 import org.springframework.statemachine.state.*;
 import org.springframework.statemachine.transition.Transition;
@@ -17,7 +19,9 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -179,19 +183,9 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
             int         count = 0;
             for (JunctionPseudoState.JunctionStateData<S, E> lJunctionStateData : lFieldChoice) {
                 count++;
-                lNextState = lJunctionStateData.getState();
-                if (lJunctionStateData.getGuard() != null) {
-                    //TODO add guard to transition
-                }
-                IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lNextState));
-                if (lFound != null) {
-                    IMdtUml2Model.IMUTransition lTransition = aParentState.addTransition(
-                            lStatePM, lFound, TransitionKind.EXTERNAL, null);
-                    lTransition.addComment("Connection " + lStatePM.getName() + "#Junction" + count);
-                } else {
-                    //TODO: create deferred transition
-                    logger.error("No state found " + lNextState);
-                }
+                State<S, E> lSsmNextState   = lJunctionStateData.getState();
+                final Guard<S, E> lSsmGuard = lJunctionStateData.getGuard();
+                handlePseudoStateJunction("Junction", aParentState, lStatePM, lSsmNextState, lSsmGuard, count);
             }
         } catch (NoSuchFieldException aE) {
             logger.error(
@@ -203,13 +197,15 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     "Can't access field 'junctions' of class 'JunctionPseudoState'. Compatible version of spring state machine used?",
                     aE
             );
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException aE) {
+            logger.error(aE.getLocalizedMessage(), aE);
         }
     }
 
-    private void processPseudoStateChoice(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
+    private void processPseudoStateChoice(IMdtUml2Model.IMURegionState aMUParentState, State<S, E> aStateSsm) {
         assert aStateSsm.getPseudoState() != null && aStateSsm.getPseudoState() instanceof ChoicePseudoState;
         ChoicePseudoState<S, E> lPseudoState = (ChoicePseudoState<S, E>) aStateSsm.getPseudoState();
-        IMdtUml2Model.IMUPseudoState lStatePM = aParentState.addPseudoState(
+        IMdtUml2Model.IMUPseudoState lMUState = aMUParentState.addPseudoState(
                 uuidFromState(aStateSsm), aStateSsm.getId().toString(),
                 IMdtUml2Model.PseudoKind.CHOICE
         );
@@ -219,23 +215,13 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
             List<ChoicePseudoState.ChoiceStateData<S, E>> lFieldChoice = (List<ChoicePseudoState.ChoiceStateData<S, E>>) lFieldChoices
                     .get(lPseudoState);
 
-            State<S, E> lNextState;
+            State<S, E> lSsmNextState;
             int         count = 0;
             for (ChoicePseudoState.ChoiceStateData<S, E> lChoiceStateData : lFieldChoice) {
                 count++;
-                lNextState = lChoiceStateData.getState();
-                if (lChoiceStateData.getGuard() != null) {
-                    //TODO add guard to transition
-                }
-                IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lNextState));
-                if (lFound != null) {
-                    IMdtUml2Model.IMUTransition lTransition = aParentState.addTransition(
-                            lStatePM, lFound, TransitionKind.EXTERNAL, null);
-                    lTransition.addComment("Connection " + lStatePM.getName() + "#Choice" + count);
-                } else {
-                    //TODO: create deferred transition
-                    logger.error("No state found " + lNextState);
-                }
+                lSsmNextState = lChoiceStateData.getState();
+                final Guard<S, E> lSsmGuard = lChoiceStateData.getGuard();
+                handlePseudoStateJunction("Choice", aMUParentState, lMUState, lSsmNextState, lSsmGuard, count);
             }
         } catch (NoSuchFieldException aE) {
             logger.error(
@@ -247,6 +233,26 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     "Can't access field 'choices' of class 'ChoicePseudoState'. Compatible version of spring state machine used?",
                     aE
             );
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException aE) {
+            logger.error(aE.getLocalizedMessage(), aE);
+        }
+    }
+
+    private void handlePseudoStateJunction(String aType, IMdtUml2Model.IMURegionState aMUParentState, IMdtUml2Model.IMUPseudoState aMUPseudoState, State<S, E> aSsmNextState, Guard<S, E> aSsmGuard, int aCount) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(aSsmNextState));
+        if (lFound != null) {
+            IMdtUml2Model.IMUTransition lTransition = aMUParentState.addTransition(
+                    aMUPseudoState, lFound, TransitionKind.EXTERNAL, null);
+            lTransition.addComment("Connection " + aMUPseudoState.getName() + "#" + aType + aCount);
+            if (aSsmGuard != null) {
+                IMdtUml2Model.IMUGuard lGuard = lTransition.setGuard(
+                        new Sha1Id(aSsmGuard.getClass()));
+                lGuard.setName(aMUPseudoState.getName() + "#" + aType + aCount);
+                lGuard.addBody(aMUPseudoState.getName() + "#" + aType + aCount);
+            }
+        } else {
+            //TODO: create deferred transition
+            logger.error(aType + ": No state found " + aSsmNextState);
         }
     }
 

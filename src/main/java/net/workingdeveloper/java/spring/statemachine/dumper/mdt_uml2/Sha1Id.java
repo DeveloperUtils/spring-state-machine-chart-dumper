@@ -1,7 +1,5 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2;
 
-import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.IId;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -17,6 +15,10 @@ public class Sha1Id implements IId {
 
     public Sha1Id(String aS) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         fHash = sha1(aS);
+    }
+
+    public Sha1Id(Class aS) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        this(aS.toString());
     }
 
     private static String sha1(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
