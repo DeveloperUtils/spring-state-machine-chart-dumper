@@ -17,8 +17,10 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -110,10 +112,7 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                         );
                         break;
                     case CHOICE:
-                        lStatePM = aParentState.addPseudoState(
-                                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
-                                IMdtUml2Model.PseudoKind.CHOICE
-                        );
+                        processPseudoStateChoice(aParentState, aStateSsm);
                         break;
                     case JUNCTION:
                         lStatePM = aParentState.addPseudoState(
@@ -163,6 +162,46 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     logger.error("Here is wrong");
                 }
             }
+        }
+    }
+
+    private void processPseudoStateChoice(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
+        assert aStateSsm.getPseudoState() != null && aStateSsm.getPseudoState() instanceof ChoicePseudoState;
+        ChoicePseudoState<S, E> lPseudoState = (ChoicePseudoState<S, E>) aStateSsm.getPseudoState();
+        IMdtUml2Model.IMUPseudoState lStatePM = aParentState.addPseudoState(
+                uuidFromState(aStateSsm), aStateSsm.getId().toString(),
+                IMdtUml2Model.PseudoKind.CHOICE
+        );
+        try {
+            Field lFieldChoices = ChoicePseudoState.class.getDeclaredField("choices");
+            lFieldChoices.setAccessible(true);
+            List<ChoicePseudoState.ChoiceStateData<S, E>> lFieldChoice = (List<ChoicePseudoState.ChoiceStateData<S, E>>) lFieldChoices
+                    .get(lPseudoState);
+
+            State<S, E> lNextState;
+            for (ChoicePseudoState.ChoiceStateData<S, E> lChoiceStateData : lFieldChoice) {
+                lNextState = lChoiceStateData.getState();
+                if (lChoiceStateData.getGuard() != null) {
+                    //TODO add guard to transition
+                }
+                IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lNextState));
+                if (lFound != null) {
+                    aParentState.addTransition(lStatePM, lFound, TransitionKind.EXTERNAL, null);
+                } else {
+                    //TODO: create deferred transition
+                    logger.error("No state found " + lNextState);
+                }
+            }
+        } catch (NoSuchFieldException aE) {
+            logger.error(
+                    "Class ChoicePseudoState doesn't have field 'choice'. Compatible version of spring state machine used?",
+                    aE
+            );
+        } catch (IllegalAccessException aE) {
+            logger.error(
+                    "Can't access field 'choice' of class 'ChoicePseudoState'. Compatible version of spring state machine used?",
+                    aE
+            );
         }
     }
 

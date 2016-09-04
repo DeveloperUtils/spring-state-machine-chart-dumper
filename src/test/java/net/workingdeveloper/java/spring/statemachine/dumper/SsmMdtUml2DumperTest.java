@@ -1,9 +1,6 @@
 package net.workingdeveloper.java.spring.statemachine.dumper;
 
-import net.workingdeveloper.java.spring.statemachine.dumper.testdata.AllStates;
-import net.workingdeveloper.java.spring.statemachine.dumper.testdata.JoinSM;
-import net.workingdeveloper.java.spring.statemachine.dumper.testdata.SMHierarch1;
-import net.workingdeveloper.java.spring.statemachine.dumper.testdata.T1;
+import net.workingdeveloper.java.spring.statemachine.dumper.testdata.*;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +57,28 @@ public class SsmMdtUml2DumperTest {
     }
 
     @Test
+    public void dumpChoiceJunction() throws Exception {
+        StateMachine<ChoiceJunctionSSM.ConfigChoice.States, ChoiceJunctionSSM.ConfigChoice.Events> lSM = build(
+                new ChoiceJunctionSSM.ConfigChoice());
+        SsmMdtUml2Dumper<ChoiceJunctionSSM.ConfigChoice.States, ChoiceJunctionSSM.ConfigChoice.Events> sut = new SsmMdtUml2Dumper<>(
+                lSM);
+
+        sut.dump();
+        System.out.println(sut.asString());
+        sut.save(new File(getBuildPath() + "/test_model_choicejunction"));
+    }
+
+    @Test
+    public void dumpForkJoin() throws Exception {
+        StateMachine<JoinSM.Config14.States2, JoinSM.Config14.Events>     lSM = build(new JoinSM.Config14());
+        SsmMdtUml2Dumper<JoinSM.Config14.States2, JoinSM.Config14.Events> sut = new SsmMdtUml2Dumper<>(lSM);
+
+        sut.dump();
+        System.out.println(sut.asString());
+        sut.save(new File(getBuildPath() + "/test_model_forkjoin"));
+    }
+
+    @Test
     @Ignore
     public void dumpHierarchy() throws Exception {
         SsmMdtUml2Dumper<SMHierarch1.States, SMHierarch1.Events> sut = new SsmMdtUml2Dumper<>(
@@ -77,16 +96,6 @@ public class SsmMdtUml2DumperTest {
         sut.dump();
         System.out.println(sut.asString());
         sut.save(new File(getBuildPath() + "/test_model_join"));
-    }
-
-    @Test
-    public void dumpForkJoin() throws Exception {
-        StateMachine<JoinSM.Config14.States2, JoinSM.Config14.Events>     lSM = build(new JoinSM.Config14());
-        SsmMdtUml2Dumper<JoinSM.Config14.States2, JoinSM.Config14.Events> sut = new SsmMdtUml2Dumper<>(lSM);
-
-        sut.dump();
-        System.out.println(sut.asString());
-        sut.save(new File(getBuildPath() + "/test_model_forkjoin"));
     }
 
     private String getBuildPath() {
