@@ -262,7 +262,11 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(aSsmNextState));
         if (lFound != null) {
             IMdtUml2Model.IMUTransition lTransition = aMUParentState.addTransition(
-                    aMUPseudoState, lFound, TransitionKind.EXTERNAL, null);
+                    aMUPseudoState,
+                    lFound,
+                    TransitionKind.EXTERNAL,
+                    aType + aCount
+            );
             lTransition.addComment("Connection " + aMUPseudoState.getName() + "#" + aType + aCount);
             if (aSsmGuard != null) {
                 final Class<? extends Guard> lGuardClass = aSsmGuard.getClass();
@@ -319,7 +323,7 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         for (State<S, E> lForkedState : lPseudoState.getForks()) {
             IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lForkedState));
             if (lFound != null) {
-                aParentState.addTransition(lStatePM, lFound, TransitionKind.EXTERNAL, null);
+                aParentState.addTransition(lStatePM, lFound, TransitionKind.EXTERNAL, (IMdtUml2Model.IMUTrigger) null);
             } else {
                 //TODO: create deferred transition
                 logger.error("No state found " + lForkedState);
@@ -337,7 +341,7 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         for (State<S, E> lJoinedState : lPseudoState.getJoins()) {
             IMdtUml2Model.IMUState lFound = fModel.find(uuidFromState(lJoinedState));
             if (lFound != null) {
-                aParentState.addTransition(lFound, lStatePM, TransitionKind.EXTERNAL, null);
+                aParentState.addTransition(lFound, lStatePM, TransitionKind.EXTERNAL, (IMdtUml2Model.IMUTrigger) null);
             } else {
                 //TODO: create deferred transition
                 logger.error("No state found " + lJoinedState);

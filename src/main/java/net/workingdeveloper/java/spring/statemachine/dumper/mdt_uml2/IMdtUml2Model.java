@@ -45,6 +45,8 @@ public interface IMdtUml2Model {
         IMUStateMachine addSubMachine(IId aUUID, String aId);
 
         IMUTransition addTransition(IMUState aSourceState, IMUState aTargetState, TransitionKind aKind, IMUTrigger aTrigger);
+
+        IMUTransition addTransition(IMUState aSourceState, IMUState aTargetState, TransitionKind aKind, String aConnectionName);
     }
 
     interface IMUPseudoState extends IMUState {

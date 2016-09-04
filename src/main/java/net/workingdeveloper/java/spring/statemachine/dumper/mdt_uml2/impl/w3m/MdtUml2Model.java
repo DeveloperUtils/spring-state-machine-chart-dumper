@@ -143,6 +143,23 @@ public class MdtUml2Model implements IMdtUml2Model {
         }
 
         @Override
+        public IMUTransition addTransition(IMUState aSourceState, IMUState aTargetState, TransitionKind aKind, String aConnectionName) {
+            IMUTransition lTransition = new MUTransition(
+                    this,
+                    fUmlState.addTransition(
+                            aSourceState.getId(),
+                            aTargetState.getId(),
+                            null
+                    )
+            );
+            String lTransitionName = aSourceState.getName() + "__" + aTargetState.getName();
+            lTransitionName += "#" + aConnectionName;
+            lTransition.setName(lTransitionName);
+
+            return lTransition;
+        }
+
+        @Override
         public IMURegionState setName(String aName) {
             fUmlState.setName(aName);
             return this;
