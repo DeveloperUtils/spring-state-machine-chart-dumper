@@ -23,7 +23,7 @@ class ModelUml extends ModelXmlBase {
         MXUNode fParent;
         Element fXmlNode;
 
-        public MXUNode(IId aIid, MXUNode aParent) {
+        MXUNode(IId aIid, MXUNode aParent) {
             fParent = aParent;
             fID = aIid;
             ModelUml.this.fStateMap.put(aIid, this);
@@ -32,16 +32,6 @@ class ModelUml extends ModelXmlBase {
         public MXUNode appendToParentXml(Element aXmlNode) {
             aXmlNode.appendChild(fXmlNode);
             return this;
-        }
-
-        public String getId() {
-            return getXmlNode().getAttribute("xmi:id");
-        }
-
-        public void setId(String aId) {
-            if (getXmlNode() != null) {
-                getXmlNode().setAttribute("xmi:id", aId);
-            }
         }
 
         public String getName() {
@@ -135,7 +125,7 @@ class ModelUml extends ModelXmlBase {
 
     abstract class MXURegionMachineShared extends MXUNode {
 
-        public MXURegionMachineShared(IId aIid, MXUNode aParent) {
+        MXURegionMachineShared(IId aIid, MXUNode aParent) {
             super(aIid, aParent);
         }
 
@@ -246,8 +236,8 @@ class ModelUml extends ModelXmlBase {
             super(new UuidId(), aParent);
             fTrigger = aMUTrigger;
             fXmlNode = createXmlElement();
-            setSource(aSourceStateUuid.toString());
-            setTarget(aTargetStateUuid.toString());
+            setSource(aSourceStateUuid);
+            setTarget(aTargetStateUuid);
         }
 
         public MXUNode appendToParentXml(Element aNode) {
@@ -259,12 +249,12 @@ class ModelUml extends ModelXmlBase {
             fXmlNode.setAttribute("name", aName);
         }
 
-        public void setSource(String aSource) {
-            fXmlNode.setAttribute("source", aSource);
+        public void setSource(IId aSource) {
+            fXmlNode.setAttribute("source", aSource.toString());
         }
 
-        public void setTarget(String aTarget) {
-            fXmlNode.setAttribute("target", aTarget);
+        public void setTarget(IId aTarget) {
+            fXmlNode.setAttribute("target", aTarget.toString());
         }
 
         @Override
@@ -285,8 +275,8 @@ class ModelUml extends ModelXmlBase {
 
     class MXUTrigger extends MXUNode {
 
-        private final String                        fEvent;
         private final IMdtUml2Model.IMUTrigger.Type fType;
+        private       String                        fEvent;
 
         public MXUTrigger(IId aId, Element aUmlModel, String aEvent, IMdtUml2Model.IMUTrigger.Type aType) {
             super(aId, null);
@@ -296,12 +286,9 @@ class ModelUml extends ModelXmlBase {
         }
 
         @Override
-        public String getName() {
-            return fEvent;
-        }
-
-        @Override
         public void setName(String aName) {
+            fEvent = aName;
+            super.setName(aName);
         }
 
         private void createXmlElement(Element aModel) {
@@ -311,12 +298,12 @@ class ModelUml extends ModelXmlBase {
             lSignal.setAttribute("xmi:id", lValue);
             lSignal.setAttribute("name", fEvent);
             aModel.appendChild(lSignal);
-            Element lSignalEvent = createElement("packagedElement");
-            lSignalEvent.setAttribute("xmi:type", "uml:SignalEvent");
-            lSignalEvent.setAttribute("xmi:id", getXmiId().toString());
-            lSignalEvent.setAttribute("name", fEvent + "Event");
-            lSignalEvent.setAttribute("signal", lValue);
-            aModel.appendChild(lSignalEvent);
+            fXmlNode = createElement("packagedElement");
+            fXmlNode.setAttribute("xmi:type", "uml:SignalEvent");
+            fXmlNode.setAttribute("xmi:id", getXmiId().toString());
+            fXmlNode.setAttribute("name", fEvent + "Event");
+            fXmlNode.setAttribute("signal", lValue);
+            aModel.appendChild(fXmlNode);
         }
 
         @Override

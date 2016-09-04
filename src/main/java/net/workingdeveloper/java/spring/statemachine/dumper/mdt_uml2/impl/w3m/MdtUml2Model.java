@@ -37,7 +37,7 @@ public class MdtUml2Model implements IMdtUml2Model {
             return fUmlState.getName();
         }
 
-        public IId getUuid() {
+        public IId getId() {
             return fUmlState.getXmiId();
         }
     }
@@ -100,8 +100,8 @@ public class MdtUml2Model implements IMdtUml2Model {
             IMUTransition lTransition = new MUTransition(
                     this,
                     fUmlState.addTransition(
-                            aSourceState.getUuid(),
-                            aTargetState.getUuid(),
+                            aSourceState.getId(),
+                            aTargetState.getId(),
                             aTrigger != null ? ((MUTrigger) aTrigger).getMUTrigger() : null
                     )
             );
@@ -143,10 +143,6 @@ public class MdtUml2Model implements IMdtUml2Model {
             fParent = aParent;
             fStateMap.put(aUmlState.getXmiId(), this);
         }
-
-        public String getId() {
-            return fUmlState.getId();
-        }
     }
 
     class MUStateMachine extends MURegionMachineSharedState<ModelUml.MXUStateMachineState, MURegionMachineSharedState> implements IMUStateMachine {
@@ -176,7 +172,7 @@ public class MdtUml2Model implements IMdtUml2Model {
         }
 
         @Override
-        public IId getUuid() {
+        public IId getId() {
             return fUmlState.getXmiId();
         }
 
@@ -248,7 +244,7 @@ public class MdtUml2Model implements IMdtUml2Model {
     public IMUStateMachine getRootState(String aName) {
         if (fRootState == null) {
             fRootState = new MUStateMachine(fUml.getRootState(), null);
-            fStateMap.put(fRootState.getUuid(), fRootState);
+            fStateMap.put(fRootState.getId(), fRootState);
         }
         return fRootState;
     }

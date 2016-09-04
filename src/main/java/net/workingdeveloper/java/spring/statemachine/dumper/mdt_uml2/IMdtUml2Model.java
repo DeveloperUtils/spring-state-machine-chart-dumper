@@ -26,11 +26,10 @@ public interface IMdtUml2Model {
 
         String getName();
 
-        IId getUuid();
+        IId getId();
     }
 
     interface IMUState extends IMUNode {
-        String getId();
     }
 
     interface IMURegionState extends IMUState {
