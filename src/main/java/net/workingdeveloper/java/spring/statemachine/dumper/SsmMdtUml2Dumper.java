@@ -276,33 +276,9 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                         + "__" + aSsmNextState.getId().toString()
                         + "#" + aType + aCount;
 
-                try {
-                    Method lMethod = lGuardClass.getMethod(getNamingMethodGuard());
-                    lMethod.setAccessible(true);
-                    Object lRet       = lMethod.invoke(aSsmGuard);
-                    String lGuardBody = lRet.toString();
+                String lGuardBody = guessName(lGuardClass, aSsmGuard);
+                if (lGuardBody != null) {
                     lGuard.addBody(lGuardBody);
-                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException aE) {
-                    //silently ignore exception as this is optional naming
-                    String lBody = null;
-                    if (isGuardGuessFromEnclosingMethod() && (
-                            lGuardClass.isAnonymousClass()
-                                    || lGuardClass.isLocalClass()
-                    )) {
-                        try {
-                            Method lMethod = lGuardClass.getEnclosingMethod();
-                            if (lMethod != null)
-                                lBody = lMethod.getName();
-                        } catch (SecurityException aE1) {
-                            //silently ignore exception as this is optional naming
-                        }
-                    }
-                    if (lBody == null && !"".equals(lGuardClass.getSimpleName())) {
-                        lBody = lGuardClass.getSimpleName();
-                    }
-                    if (lBody != null) {
-                        lGuard.addBody(lBody);
-                    }
                 }
                 lGuard.setName(lGuardName);
                 lGuard.addBody(lGuardClass.toString());
@@ -310,6 +286,33 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         } else {
             //TODO: create deferred transition
             logger.error(aType + ": No state found " + aSsmNextState);
+        }
+    }
+
+    private String guessName(Class<?> aClass, Object aO) {
+        String lName = null;
+        try {
+            Method lMethod = aClass.getMethod(getNamingMethodGuard());
+            lMethod.setAccessible(true);
+            Object lRet = lMethod.invoke(aO);
+            return lRet.toString();
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException aE) {
+            //silently ignore exception as this is optional naming
+            lName = null;
+            if (isGuardGuessFromEnclosingMethod()
+                    && (aClass.isAnonymousClass() || aClass.isLocalClass())) {
+                try {
+                    Method lMethod = aClass.getEnclosingMethod();
+                    if (lMethod != null)
+                        lName = lMethod.getName();
+                } catch (SecurityException aE1) {
+                    //silently ignore exception as this is optional naming
+                }
+            }
+            if (lName == null && !"".equals(aClass.getSimpleName())) {
+                lName = aClass.getSimpleName();
+            }
+            return lName;
         }
     }
 
