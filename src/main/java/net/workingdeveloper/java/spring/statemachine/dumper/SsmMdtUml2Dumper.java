@@ -8,13 +8,13 @@ import net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2.impl.w3m.Md
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.guard.Guard;
 import org.springframework.statemachine.region.Region;
 import org.springframework.statemachine.state.*;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.statemachine.transition.TransitionKind;
 import org.springframework.statemachine.trigger.TimerTrigger;
-import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -106,7 +106,7 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
     }
 
     private void processState(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
-        IMdtUml2Model.IMUState lStatePM;
+        IMdtUml2Model.IMUState lStatePM = null;
 
         if (aStateSsm.isSimple()) {
             if (aStateSsm.getPseudoState() != null) {
@@ -184,6 +184,7 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                 }
             }
         }
+        processActions(lStatePM, aStateSsm);
     }
 
     private void processPseudoStateJunction(IMdtUml2Model.IMURegionState aParentState, State<S, E> aStateSsm) {
@@ -352,8 +353,17 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         }
     }
 
-    private void processActions(Element aParentXml, State<S, E> aState) {
-
+    private void processActions(IMdtUml2Model.IMUState aParentXml, State<S, E> aState) {
+        if (aState.getEntryActions() != null) {
+            for (Action<S, E> lAction : aState.getEntryActions()) {
+                aParentXml.addEntryAction(guessName(lAction.getClass(), lAction));
+            }
+        }
+        if (aState.getExitActions() != null) {
+            for (Action<S, E> lAction : aState.getExitActions()) {
+                aParentXml.addExitAction(guessName(lAction.getClass(), lAction));
+            }
+        }
     }
 
     private void processTransitions(IMdtUml2Model.IMURegionState aParentRegionPM, Region<S, E> aRegion) {

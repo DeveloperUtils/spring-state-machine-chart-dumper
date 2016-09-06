@@ -19,6 +19,30 @@ import java.util.HashMap;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 public class MdtUml2Model implements IMdtUml2Model {
+    abstract class MUAction extends MUNode<ModelUml.MXUNode> implements IMUAction {
+
+        private final MUState<?, ?> fParent;
+
+        MUAction(ModelUml.MXUNode aUmlState, String aName, MUState<?, ?> aParentState) {
+            super(aUmlState);
+            fParent = aParentState;
+        }
+    }
+
+    class MUActionEntry extends MUAction {
+
+        MUActionEntry(ModelUml.MXUNode aUmlState, String aName, MUState<?, ?> aParentState) {
+            super(aUmlState, aName, aParentState);
+        }
+    }
+
+    class MUActionExit extends MUAction {
+
+        MUActionExit(ModelUml.MXUNode aUmlState, String aName, MUState<?, ?> aParentState) {
+            super(aUmlState, aName, aParentState);
+        }
+    }
+
     class MUGuard extends MUNode<ModelUml.MXUGuard> implements IMUGuard {
 
         MUGuard(ModelUml.MXUGuard aUmlState) {
@@ -67,13 +91,13 @@ public class MdtUml2Model implements IMdtUml2Model {
         }
     }
 
-    class MUPseudoState extends MUState<ModelUml.MXUNode, MURegionMachineSharedState>
+    class MUPseudoState extends MUState<ModelUml.MXUStateBase, MURegionMachineSharedState>
             implements IMUPseudoState, IMUPChoiceState, IMUPDeppHistoryState, IMUPEntryPointState,
             IMUPExitPointState, IMUPForkState, IMUPInitialState, IMUPJoinState,
             IMUPJunctionState, IMUPShallowHistoryState {
         PseudoKind fKind;
 
-        public MUPseudoState(ModelUml.MXUNode aUmlMXUNode, MURegionMachineSharedState aParent) {
+        public MUPseudoState(ModelUml.MXUStateBase aUmlMXUNode, MURegionMachineSharedState aParent) {
             super(aUmlMXUNode, aParent);
         }
 
@@ -173,20 +197,28 @@ public class MdtUml2Model implements IMdtUml2Model {
         }
     }
 
-    class MUSimpleState extends MUState<ModelUml.MXUNode, MURegionMachineSharedState> implements IMUState {
+    class MUSimpleState extends MUState<ModelUml.MXUStateBase, MURegionMachineSharedState> implements IMUState {
 
-        public MUSimpleState(ModelUml.MXUNode aUmlMXUNode, MURegionMachineSharedState aParent) {
+        public MUSimpleState(ModelUml.MXUStateBase aUmlMXUNode, MURegionMachineSharedState aParent) {
             super(aUmlMXUNode, aParent);
         }
     }
 
-    abstract class MUState<UMLMODEL extends ModelUml.MXUNode, PARENT extends MUState> extends MUNode<UMLMODEL> {
+    abstract class MUState<UMLMODEL extends ModelUml.MXUStateBase, PARENT extends MUState> extends MUNode<UMLMODEL> {
         PARENT fParent;
 
         MUState(UMLMODEL aUmlState, PARENT aParent) {
             super(aUmlState);
             fParent = aParent;
             fStateMap.put(aUmlState.getXmiId(), this);
+        }
+
+        public IMUAction addEntryAction(String aName) {
+            return new MUActionEntry(fUmlState.addEntryAction(aName), aName, this);
+        }
+
+        public IMUAction addExitAction(String aName) {
+            return new MUActionExit(fUmlState.addExitAction(aName), aName, this);
         }
     }
 

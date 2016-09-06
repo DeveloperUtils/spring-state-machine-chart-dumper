@@ -1,6 +1,8 @@
 package net.workingdeveloper.java.spring.statemachine.dumper.testdata;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
@@ -25,10 +27,37 @@ public class JoinSM {
                 throws Exception {
             states
                     .withStates()
-                    .initial(States2.S1)
+                    .initial(States2.S1, new Action<States2, Events>() {
+                        @Override
+                        public void execute(StateContext<States2, Events> context) {
+                            ;
+                        }
+
+                        public String getName() {
+                            return "testEntry";
+                        }
+                    })
                     .state(States2.S3)
                     .join(States2.S4)
-                    .state(States2.S5)
+                    .state(States2.S5, new Action<States2, Events>() {
+                        @Override
+                        public void execute(StateContext<States2, Events> context) {
+
+                        }
+
+                        public String getName() {
+                            return "testEntryS5";
+                        }
+                    }, new Action<States2, Events>() {
+                        @Override
+                        public void execute(StateContext<States2, Events> context) {
+
+                        }
+
+                        protected String getName() {
+                            return "testExit";
+                        }
+                    })
                     .state(States2.S6)
                     .and()
                     .withStates()

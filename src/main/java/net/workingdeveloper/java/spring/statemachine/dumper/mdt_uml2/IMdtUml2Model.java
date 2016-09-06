@@ -21,6 +21,10 @@ public interface IMdtUml2Model {
         FINAL
     }
 
+    interface IMUAction extends IMUNode {
+
+    }
+
     interface IMUNode {
         <T extends IMUNode> T addComment(String aS);
 
@@ -32,6 +36,9 @@ public interface IMdtUml2Model {
     }
 
     interface IMUState extends IMUNode {
+        IMUAction addEntryAction(String aName);
+
+        IMUAction addExitAction(String aName);
     }
 
     interface IMURegionState extends IMUState {

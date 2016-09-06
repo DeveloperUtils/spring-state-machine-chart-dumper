@@ -19,6 +19,60 @@ import java.util.Map;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 class ModelUml extends ModelXmlBase {
+    abstract class MXUAction extends MXUNode {
+
+        MXUAction(IId aId, String aName, MXUNode aParent) {
+            super(aId, aParent);
+            fXmlNode = createXmlElement();
+            setName(aName);
+            addLanguage("bean");
+        }
+
+        public MXUAction addBody(String aBody) {
+            Element lBody = createElement("body");
+            getXmlNode().appendChild(lBody);
+            lBody.appendChild(createTextNode(aBody));
+            return this;
+        }
+
+        public MXUAction addLanguage(String aLanguageName) {
+            Element lLanguage = createElement("language");
+            getXmlNode().appendChild(lLanguage);
+            lLanguage.appendChild(createTextNode(aLanguageName));
+            return this;
+        }
+    }
+
+    class MXUActionEntry extends MXUAction {
+
+        MXUActionEntry(IId aId, String aName, MXUNode aParent) {
+            super(aId, aName, aParent);
+        }
+
+        @Override
+        Element createXmlElement() {
+            Element lElement = createElement("entry");
+            lElement.setAttribute("xmi:id", getXmiId().toString());
+            lElement.setAttribute("xmi:type", "uml:FunctionBehavior");
+            return lElement;
+        }
+    }
+
+    class MXUActionExit extends MXUAction {
+
+        MXUActionExit(IId aId, String aName, MXUNode aParent) {
+            super(aId, aName, aParent);
+        }
+
+        @Override
+        Element createXmlElement() {
+            Element lElement = createElement("exit");
+            lElement.setAttribute("xmi:id", getXmiId().toString());
+            lElement.setAttribute("xmi:type", "uml:FunctionBehavior");
+            return lElement;
+        }
+    }
+
     class MXUGuard extends MXUNode {
         Element fSpecificationXml;
 
@@ -81,10 +135,10 @@ class ModelUml extends ModelXmlBase {
         MXUNode fParent;
         Element fXmlNode;
 
-        MXUNode(IId aIid, MXUNode aParent) {
+        MXUNode(IId aId, MXUNode aParent) {
             fParent = aParent;
-            fID = aIid;
-            ModelUml.this.fStateMap.put(aIid, this);
+            fID = aId;
+            ModelUml.this.fStateMap.put(aId, this);
         }
 
         public MXUNode appendToParentXml(Element aXmlNode) {
@@ -100,8 +154,12 @@ class ModelUml extends ModelXmlBase {
             getXmlNode().setAttribute("name", aName);
         }
 
-        public Element getXmlNode() {
+        Element getXmlNode() {
             return fXmlNode;
+        }
+
+        MXUNode getParent() {
+            return fParent;
         }
 
         IId getXmiId() {
@@ -129,9 +187,9 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class MXUPseudoState extends MXUNode {
+    class MXUPseudoState extends MXUStateBase {
 
-        MXUPseudoState(IId aIid, IMdtUml2Model.PseudoKind aKind, MXUNode aParent) {
+        MXUPseudoState(IId aIid, IMdtUml2Model.PseudoKind aKind, MXUStateBase aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement(aKind);
         }
@@ -181,9 +239,9 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    abstract class MXURegionMachineShared extends MXUNode {
+    abstract class MXURegionMachineShared extends MXUStateBase {
 
-        MXURegionMachineShared(IId aIid, MXUNode aParent) {
+        MXURegionMachineShared(IId aIid, MXUStateBase aParent) {
             super(aIid, aParent);
         }
 
@@ -224,7 +282,7 @@ class ModelUml extends ModelXmlBase {
 
     class MXURegionState extends MXURegionMachineShared {
 
-        MXURegionState(IId aIid, MXUNode aParent) {
+        MXURegionState(IId aIid, MXUStateBase aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
@@ -240,7 +298,7 @@ class ModelUml extends ModelXmlBase {
     }
 
     class MXURootStateMachine extends MXUStateMachineState {
-        public MXURootStateMachine(IId aIid, MXUNode aParent) {
+        public MXURootStateMachine(IId aIid, MXUStateBase aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
@@ -255,9 +313,9 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
-    class MXUSimpleState extends MXUNode {
+    class MXUSimpleState extends MXUStateBase {
 
-        MXUSimpleState(IId aIid, MXUNode aParent) {
+        MXUSimpleState(IId aIid, MXUStateBase aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
@@ -271,9 +329,28 @@ class ModelUml extends ModelXmlBase {
         }
     }
 
+    abstract class MXUStateBase extends MXUNode {
+
+        MXUStateBase(IId aIid, MXUStateBase aParent) {
+            super(aIid, aParent);
+        }
+
+        MXUAction addEntryAction(String aName) {
+            MXUActionEntry lActionEntry = new MXUActionEntry(new UuidId(), aName, this);
+            lActionEntry.appendToParentXml(getXmlNode());
+            return lActionEntry;
+        }
+
+        MXUAction addExitAction(String aName) {
+            MXUActionExit lActionExit = new MXUActionExit(new UuidId(), aName, this);
+            lActionExit.appendToParentXml(getXmlNode());
+            return lActionExit;
+        }
+    }
+
     class MXUStateMachineState extends MXURegionMachineShared {
 
-        MXUStateMachineState(IId aIid, MXUNode aParent) {
+        MXUStateMachineState(IId aIid, MXUStateBase aParent) {
             super(aIid, aParent);
             fXmlNode = createXmlElement();
         }
