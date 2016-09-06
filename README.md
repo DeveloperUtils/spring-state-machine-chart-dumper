@@ -18,8 +18,8 @@ Library to Dump/draw a state machine chart out of a [Spring Statemachine](http:/
 + [x] Pseudostate FORK dumped
 + [x] Pseudostate CHOICE dumped
 + [x] Pseudostate JUNCTION dumped
++ [x] Actions not dumped
 
-- [ ] Actions not dumped
 - [ ] Time triggers not dumped
 - [ ] Lots of the Pseudostates not dumped with their specialization
 - [ ] Tests are not yet real tests
