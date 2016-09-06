@@ -93,6 +93,8 @@ public interface IMdtUml2Model {
 
     interface IMUTransition extends IMUNode {
 
+        IMUAction addAction(String aName);
+
         IMUGuard setGuard(IId aGuardId);
 
         IMUTransition setName(String aName);

@@ -19,7 +19,7 @@ import java.util.Map;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 class ModelUml extends ModelXmlBase {
-    abstract class MXUAction extends MXUNode {
+    class MXUAction extends MXUNode {
 
         MXUAction(IId aId, String aName, MXUNode aParent) {
             super(aId, aParent);
@@ -40,6 +40,14 @@ class ModelUml extends ModelXmlBase {
             getXmlNode().appendChild(lLanguage);
             lLanguage.appendChild(createTextNode(aLanguageName));
             return this;
+        }
+
+        @Override
+        Element createXmlElement() {
+            Element lElement = createElement("effect");
+            lElement.setAttribute("xmi:id", getXmiId().toString());
+            lElement.setAttribute("xmi:type", "uml:FunctionBehavior");
+            return lElement;
         }
     }
 
@@ -373,6 +381,12 @@ class ModelUml extends ModelXmlBase {
             fXmlNode = createXmlElement();
             setSource(aSourceStateUuid);
             setTarget(aTargetStateUuid);
+        }
+
+        public MXUAction addAction(String aName) {
+            MXUAction lActionEntry = new MXUAction(new UuidId(), aName, this);
+            lActionEntry.appendToParentXml(getXmlNode());
+            return lActionEntry;
         }
 
         public MXUNode appendToParentXml(Element aNode) {

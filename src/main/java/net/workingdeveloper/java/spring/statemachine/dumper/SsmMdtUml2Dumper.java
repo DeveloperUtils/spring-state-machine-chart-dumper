@@ -366,6 +366,12 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         }
     }
 
+    private void processActions(IMdtUml2Model.IMUTransition aMUTransition, Transition<S, E> aTransitionSsm) {
+        for (Action<S, E> lAction : aTransitionSsm.getActions()) {
+            aMUTransition.addAction(guessName(lAction.getClass(), lAction));
+        }
+    }
+
     private void processTransitions(IMdtUml2Model.IMURegionState aParentRegionPM, Region<S, E> aRegion) {
         Collection<Transition<S, E>> lTransitions = aRegion.getTransitions();
         for (Transition<S, E> lTransition : lTransitions) {
@@ -374,12 +380,13 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                     lTransition.getTrigger() instanceof TimerTrigger ? IMdtUml2Model.IMUTrigger.Type.TIMER
                                                                      : IMdtUml2Model.IMUTrigger.Type.EVENT
             );
-            aParentRegionPM.addTransition(
+            IMdtUml2Model.IMUTransition lMUTransition = aParentRegionPM.addTransition(
                     fModel.find(uuidFromState(lTransition.getSource())),
                     fModel.find(uuidFromState(lTransition.getTarget())),
                     lTransition.getKind(),
                     lTrigger
             );
+            processActions(lMUTransition, lTransition);
         }
     }
 

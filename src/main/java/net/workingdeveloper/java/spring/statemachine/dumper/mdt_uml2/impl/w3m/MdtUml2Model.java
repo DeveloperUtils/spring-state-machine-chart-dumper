@@ -19,11 +19,11 @@ import java.util.HashMap;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 public class MdtUml2Model implements IMdtUml2Model {
-    abstract class MUAction extends MUNode<ModelUml.MXUNode> implements IMUAction {
+    class MUAction extends MUNode<ModelUml.MXUNode> implements IMUAction {
 
-        private final MUState<?, ?> fParent;
+        private final MUNode<?> fParent;
 
-        MUAction(ModelUml.MXUNode aUmlState, String aName, MUState<?, ?> aParentState) {
+        MUAction(ModelUml.MXUNode aUmlState, String aName, MUNode<?> aParentState) {
             super(aUmlState);
             fParent = aParentState;
         }
@@ -241,6 +241,11 @@ public class MdtUml2Model implements IMdtUml2Model {
         public MUTransition(IMURegionState aParent, ModelUml.MXUTransition aMUTransition) {
             super(aMUTransition);
             fParent = aParent;
+        }
+
+        @Override
+        public IMUAction addAction(String aName) {
+            return new MUAction(fUmlState.addAction(aName), aName, this);
         }
 
         @Override

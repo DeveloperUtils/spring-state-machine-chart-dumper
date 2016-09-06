@@ -87,6 +87,16 @@ public class JoinSM {
                     .withExternal()
                     .source(States2.S1).target(States2.S3)
                     .event(Events.E_S1__S3)
+                    .action(new Action<States2, Events>() {
+                        @Override
+                        public void execute(StateContext<States2, Events> context) {
+                            ;
+                        }
+
+                        public String getName() {
+                            return "testTransition";
+                        }
+                    })
                     .and()
                     .withExternal()
                     .source(States2.S3).target(States2.S4)
