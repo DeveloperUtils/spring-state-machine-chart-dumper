@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -277,9 +275,13 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
                         + "__" + aSsmNextState.getId().toString()
                         + "#" + aType + aCount;
 
-                String lGuardBody = guessName(lGuardClass, aSsmGuard);
-                if (lGuardBody != null) {
-                    lGuard.addBody(lGuardBody);
+                try {
+                    String lGuardBody = getNamingStrategyGuard().getName(aSsmGuard);
+                    if (lGuardBody != null) {
+                        lGuard.addBody(lGuardBody);
+                    }
+                } catch (Exception aE) {
+                    aE.printStackTrace();
                 }
                 lGuard.setName(lGuardName);
                 lGuard.addBody(lGuardClass.toString());
@@ -287,33 +289,6 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
         } else {
             //TODO: create deferred transition
             logger.error(aType + ": No state found " + aSsmNextState);
-        }
-    }
-
-    private String guessName(Class<?> aClass, Object aO) {
-        String lName = null;
-        try {
-            Method lMethod = aClass.getMethod(getNamingMethodGuard());
-            lMethod.setAccessible(true);
-            Object lRet = lMethod.invoke(aO);
-            return lRet.toString();
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException aE) {
-            //silently ignore exception as this is optional naming
-            lName = null;
-            if (isGuardGuessFromEnclosingMethod()
-                    && (aClass.isAnonymousClass() || aClass.isLocalClass())) {
-                try {
-                    Method lMethod = aClass.getEnclosingMethod();
-                    if (lMethod != null)
-                        lName = lMethod.getName();
-                } catch (SecurityException aE1) {
-                    //silently ignore exception as this is optional naming
-                }
-            }
-            if (lName == null && !"".equals(aClass.getSimpleName())) {
-                lName = aClass.getSimpleName();
-            }
-            return lName;
         }
     }
 
@@ -356,19 +331,40 @@ public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
     private void processActions(IMdtUml2Model.IMUState aParentXml, State<S, E> aState) {
         if (aState.getEntryActions() != null) {
             for (Action<S, E> lAction : aState.getEntryActions()) {
-                aParentXml.addEntryAction(guessName(lAction.getClass(), lAction));
+                String lName = null;
+                try {
+                    lName = getNamingStrategyAction().getName(lAction);
+                } catch (Exception aE) {
+                    logger.warn("Could not guess name of Entry Action for state " + aState.getId(), aE);
+                    lName = "EntryAction" + aState.getId().toString() + ": " + lAction.toString();
+                }
+                aParentXml.addEntryAction(lName);
             }
         }
         if (aState.getExitActions() != null) {
             for (Action<S, E> lAction : aState.getExitActions()) {
-                aParentXml.addExitAction(guessName(lAction.getClass(), lAction));
+                String lName = null;
+                try {
+                    lName = getNamingStrategyAction().getName(lAction);
+                } catch (Exception aE) {
+                    logger.warn("Could not guess name of Exit Action for state " + aState.getId(), aE);
+                    lName = "ExitAction" + aState.getId().toString() + ": " + lAction.toString();
+                }
+                aParentXml.addExitAction(lName);
             }
         }
     }
 
     private void processActions(IMdtUml2Model.IMUTransition aMUTransition, Transition<S, E> aTransitionSsm) {
         for (Action<S, E> lAction : aTransitionSsm.getActions()) {
-            aMUTransition.addAction(guessName(lAction.getClass(), lAction));
+            String lName = null;
+            try {
+                lName = getNamingStrategyAction().getName(lAction);
+            } catch (Exception aE) {
+                logger.warn("Could not guess name of transition Action for transition " + aTransitionSsm, aE);
+                lName = "Action" + aTransitionSsm.toString() + ": " + lAction.toString();
+            }
+            aMUTransition.addAction(lName);
         }
     }
 

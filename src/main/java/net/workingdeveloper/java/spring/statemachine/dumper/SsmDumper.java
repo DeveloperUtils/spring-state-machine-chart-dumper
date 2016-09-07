@@ -1,5 +1,6 @@
 package net.workingdeveloper.java.spring.statemachine.dumper;
 
+import net.workingdeveloper.java.spring.statemachine.dumper.strategy.*;
 import org.springframework.statemachine.StateMachine;
 
 import java.io.File;
@@ -12,11 +13,30 @@ import java.nio.file.Files;
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
 abstract public class SsmDumper<S, E> {
-
+    INamingStrategy fNamingStrategyAction;
+    INamingStrategy fNamingStrategyGuard;
     StateMachine<S, E> fStateMachine;
 
-    public SsmDumper(StateMachine<S, E> aStateMachine) {
+    public SsmDumper(StateMachine<S, E> aStateMachine, INamingStrategy aNamingStrategyAction, INamingStrategy aNamingStrategyGuard) {
+        fNamingStrategyAction = aNamingStrategyAction;
+        fNamingStrategyGuard = aNamingStrategyGuard;
         fStateMachine = aStateMachine;
+    }
+
+    public SsmDumper(StateMachine<S, E> aStateMachine) {
+        this(aStateMachine, new ChainedNamingStrategy(new INamingStrategy[]{
+                     new GetFromMethodNamingStrategy("getName"),
+                     new SimpleClassNameNamingStrategy(),
+                     new GuessFromEnclosingMethodNamingStrategy(),
+                     new ToStringNamingStrategy()
+             }),
+             new ChainedNamingStrategy(new INamingStrategy[]{
+                     new GetFromMethodNamingStrategy("getName"),
+                     new SimpleClassNameNamingStrategy(),
+                     new GuessFromEnclosingMethodNamingStrategy(),
+                     new ToStringNamingStrategy()
+             })
+        );
     }
 
     abstract public String asString();
@@ -26,6 +46,22 @@ abstract public class SsmDumper<S, E> {
     public <T extends SsmDumper> T dump(File aFile) throws IOException {
         dump().save(aFile);
         return (T) this;
+    }
+
+    public INamingStrategy getNamingStrategyAction() {
+        return fNamingStrategyAction;
+    }
+
+    public void setNamingStrategyAction(INamingStrategy aNamingStrategyAction) {
+        fNamingStrategyAction = aNamingStrategyAction;
+    }
+
+    public INamingStrategy getNamingStrategyGuard() {
+        return fNamingStrategyGuard;
+    }
+
+    public void setNamingStrategyGuard(INamingStrategy aNamingStrategyGuard) {
+        fNamingStrategyGuard = aNamingStrategyGuard;
     }
 
     public StateMachine<S, E> getStateMachine() {
