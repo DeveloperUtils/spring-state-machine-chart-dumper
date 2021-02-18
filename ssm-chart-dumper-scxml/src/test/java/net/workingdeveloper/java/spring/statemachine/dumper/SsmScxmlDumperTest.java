@@ -3,13 +3,13 @@ package net.workingdeveloper.java.spring.statemachine.dumper;
 import net.workingdeveloper.java.spring.statemachine.dumper.testdata.SMHierarch1;
 import net.workingdeveloper.java.spring.statemachine.dumper.testdata.T1;
 import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.statemachine.test.AbstractStateMachineTests;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -18,7 +18,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.HashSet;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -26,7 +27,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {T1.class, SMHierarch1.class})
 public class SsmScxmlDumperTest extends AbstractStateMachineTests {
     @Autowired

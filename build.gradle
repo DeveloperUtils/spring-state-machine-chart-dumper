@@ -1,38 +1,95 @@
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-    apply from: 'https://raw.github.com/akhikhl/unpuzzle/master/pluginScripts/unpuzzle.plugin'
+buildscript {
+    ext {
+        versions = [
+            spring       : "5.3.+",
+            ssm          : "1.1+",
+            junit        : "5.7.+",
+            junitPlatform: "1.7.+",
+        ]
+    }
 
-    group 'net.workingdeveloper.ssm-chart-dumper'
-    version = '0.4.0-SNAPSHOT'
+    ext.allRepositories = {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
+
+    repositories(allRepositories)
+}
+
+plugins {
+    id "io.spring.dependency-management" version "1.0.9.RELEASE" apply false
+    id "io.gitlab.arturbosch.detekt" version "1.5.1" apply false
+    id "com.palantir.git-version" version "0.12.3" apply false
+}
+
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: "java-library"
+    apply plugin: "eclipse"
+    apply plugin: "idea"
+    apply plugin: "io.spring.dependency-management"
+    apply from: "https://raw.github.com/akhikhl/unpuzzle/master/pluginScripts/unpuzzle.plugin"
+
+    group "net.workingdeveloper.ssm-chart-dumper"
+    version = "0.4.0-SNAPSHOT"
 
 //jar {
-//    baseName = 'net.workingdeveloper.java.spring.statemachine.dumper'
+//    baseName = "net.workingdeveloper.java.spring.statemachine.dumper"
 //
 //}
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
+    repositories(allRepositories)
+
+    configurations {
+        all*.exclude module: "commons-logging"
+        all*.exclude module: "org.junit"
     }
 
     dependencies {
-        implementation"org.springframework.statemachine:spring-statemachine-core:1.1+"
-        implementation "org.springframework.statemachine:spring-statemachine-uml:1.1+"
-                implementation 'org.slf4j:slf4j-api:+'
-        implementation 'org.slf4j:jcl-over-slf4j:+'
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.+'
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.+'
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.+'
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.+'
-        testImplementation "org.springframework.statemachine:spring-statemachine-test:1.1+"
-        testImplementation group: 'junit', name: 'junit', version: '4.+'
-        testImplementation 'org.springframework:spring-test:4.2+'
+        implementation "org.springframework:spring-context:${versions.spring}"
+
+        implementation "org.springframework.statemachine:spring-statemachine-core:${versions.ssm}"
+        implementation "org.springframework.statemachine:spring-statemachine-uml:${versions.ssm}"
+        implementation "org.slf4j:slf4j-api:1.+"
+        implementation "org.slf4j:jcl-over-slf4j:+"
+        implementation "org.apache.logging.log4j:log4j-api:2.+"
+        implementation "org.apache.logging.log4j:log4j-core:2.+"
+        implementation "org.apache.logging.log4j:log4j-jcl:2.+"
+        runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:2.+"
+
+        testImplementation "org.springframework.statemachine:spring-statemachine-test:${versions.ssm}"
+        testImplementation "org.springframework:spring-test:${versions.spring}"
+
+        testImplementation "org.junit.jupiter:junit-jupiter:${versions.junit}"
+        testImplementation "org.assertj:assertj-core:3.15.0"
+        testImplementation "org.mockito:mockito-core:3.7.7"
+        testImplementation "org.mockito:mockito-junit-jupiter:3.7.7"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
+        testRuntimeOnly "org.junit.platform:junit-platform-engine:${versions.junitPlatform}"
+        testRuntimeOnly "org.junit.platform:junit-platform-commons:${versions.junitPlatform}"
+        testRuntimeOnly "org.junit.platform:junit-platform-launcher:${versions.junitPlatform}"
+        testRuntimeOnly "org.junit.platform:junit-platform-console:${versions.junitPlatform}"
+
         testImplementation "org.hamcrest:hamcrest-core:1.+"
         testImplementation "org.hamcrest:hamcrest-library:1.+"
+    }
+
+    test {
+        useJUnitPlatform()
+
+        environment "TESTCONTAINERS_RYUK_DISABLED", "true"
+        testLogging {
+            events "passed", "skipped", "failed"
+        }
+        reports {
+            html.enabled = true
+        }
     }
 
     task dumpsDirExists {
@@ -40,5 +97,4 @@ subprojects {
         work.mkdirs()
     }
     test.dependsOn dumpsDirExists
-
 }
