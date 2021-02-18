@@ -3,7 +3,7 @@ subprojects {
     apply plugin: 'eclipse'
     apply from: 'https://raw.github.com/akhikhl/unpuzzle/master/pluginScripts/unpuzzle.plugin'
 
-    group 'net.workingdeveloper.java.spring'
+    group 'net.workingdeveloper.ssm-chart-dumper'
     version = '0.4.0-SNAPSHOT'
 
 //jar {
