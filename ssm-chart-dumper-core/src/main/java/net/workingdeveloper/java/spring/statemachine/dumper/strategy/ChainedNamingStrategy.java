@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by Christoph Graupner on 2016-09-07.
- *
- * @author Christoph Graupner <ch.graupner@workingdeveloper.net>
- */
 public class ChainedNamingStrategy implements INamingStrategy {
     List<INamingStrategy> fNamingStrategies = new ArrayList<>();
 

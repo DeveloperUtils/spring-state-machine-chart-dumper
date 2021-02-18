@@ -4,16 +4,8 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collection;
 
-/**
- * Created by Christoph Graupner on 8/16/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 @Service
 public class SsmStringDumper<S, E> extends SsmDumper<S, E> {
 

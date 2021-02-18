@@ -22,11 +22,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-/**
- * Created by Christoph Graupner on 8/16/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {T1.class, SMHierarch1.class})
 public class SsmScxmlDumperTest extends AbstractStateMachineTests {

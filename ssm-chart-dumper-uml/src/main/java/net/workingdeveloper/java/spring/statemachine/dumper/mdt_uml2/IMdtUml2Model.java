@@ -5,11 +5,6 @@ import org.springframework.statemachine.transition.TransitionKind;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Created by Christoph Graupner on 8/22/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 public interface IMdtUml2Model {
     enum UmlType {
         FINALSTATE, PSEUDO_STATE, STATE

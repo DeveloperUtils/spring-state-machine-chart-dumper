@@ -3,11 +3,6 @@ package net.workingdeveloper.java.spring.statemachine.dumper.strategy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-/**
- * Created by Christoph Graupner on 2016-09-07.
- *
- * @author Christoph Graupner <ch.graupner@workingdeveloper.net>
- */
 public class GetFromMethodNamingStrategy implements INamingStrategy {
     private String fNamingMethod;
 

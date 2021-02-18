@@ -5,11 +5,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Created by Christoph Graupner on 8/27/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 public class Sha1Id implements IId {
     String fHash;
 

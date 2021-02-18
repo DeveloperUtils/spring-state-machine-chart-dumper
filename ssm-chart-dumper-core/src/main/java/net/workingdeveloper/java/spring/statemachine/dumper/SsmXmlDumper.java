@@ -20,11 +20,6 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by Christoph Graupner on 8/20/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 abstract class SsmXmlDumper<S, E> extends SsmDumper<S, E> {
 
     private Document fXmlDocument;

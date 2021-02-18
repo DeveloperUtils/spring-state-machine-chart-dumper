@@ -8,11 +8,6 @@ import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 
-/**
- * Created by Christoph Graupner on 8/29/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 public class JoinSM {
     @Configuration
     @EnableStateMachine

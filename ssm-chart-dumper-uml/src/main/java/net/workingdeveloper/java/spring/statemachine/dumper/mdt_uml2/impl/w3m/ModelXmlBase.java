@@ -18,11 +18,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 
-/**
- * Created by Christoph Graupner on 8/23/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 abstract class ModelXmlBase {
     protected Document fDocument;
 

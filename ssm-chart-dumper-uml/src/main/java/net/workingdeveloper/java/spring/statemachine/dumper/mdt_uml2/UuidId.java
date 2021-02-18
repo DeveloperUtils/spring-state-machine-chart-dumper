@@ -2,11 +2,6 @@ package net.workingdeveloper.java.spring.statemachine.dumper.mdt_uml2;
 
 import java.util.UUID;
 
-/**
- * Created by Christoph Graupner on 8/23/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 public class UuidId implements IId {
     private final UUID fUuid;
 

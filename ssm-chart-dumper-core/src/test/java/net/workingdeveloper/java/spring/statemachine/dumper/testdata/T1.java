@@ -11,11 +11,6 @@ import org.springframework.statemachine.config.StateMachineBuilder;
 
 import java.util.EnumSet;
 
-/**
- * Created by Christoph Graupner on 8/16/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 @Configuration
 public class T1 {
     public enum States {

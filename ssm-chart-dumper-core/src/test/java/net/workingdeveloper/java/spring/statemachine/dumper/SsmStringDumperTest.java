@@ -17,11 +17,6 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
-/**
- * Created by Christoph Graupner on 8/16/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = {T1.class, SMHierarch1.class})
 @TestExecutionListeners(listeners = {DependencyInjectionTestExecutionListener.class,

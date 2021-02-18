@@ -10,11 +10,6 @@ import org.springframework.statemachine.config.configurers.StateConfigurer;
 import org.springframework.statemachine.guard.Guard;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by Christoph Graupner on 8/22/16.
- *
- * @author Christoph Graupner <ch.graupner@workingdeveloper.net>
- */
 @Service
 public class AllStates {
     public enum States {

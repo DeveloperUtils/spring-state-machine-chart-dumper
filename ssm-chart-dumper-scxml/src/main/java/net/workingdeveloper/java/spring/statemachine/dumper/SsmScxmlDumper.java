@@ -13,11 +13,6 @@ import org.w3c.dom.Element;
 
 import java.util.Collection;
 
-/**
- * Created by Christoph Graupner on 8/16/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 @Service
 public class SsmScxmlDumper<S, E> extends SsmXmlDumper<S, E> {
 

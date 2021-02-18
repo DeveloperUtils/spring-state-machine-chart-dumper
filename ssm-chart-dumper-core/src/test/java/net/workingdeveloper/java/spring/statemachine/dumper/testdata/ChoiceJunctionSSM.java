@@ -10,11 +10,6 @@ import org.springframework.statemachine.guard.Guard;
 
 import java.util.EnumSet;
 
-/**
- * Created by Christoph Graupner on 2016-09-04.
- *
- * @author Christoph Graupner <ch.graupner@workingdeveloper.net>
- */
 public class ChoiceJunctionSSM {
     @Configuration
     @EnableStateMachine

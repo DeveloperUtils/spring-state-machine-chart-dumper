@@ -7,11 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-/**
- * Created by Christoph Graupner on 8/16/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 abstract public class SsmDumper<S, E> {
     INamingStrategy fNamingStrategyAction;
     INamingStrategy fNamingStrategyGuard;

@@ -27,11 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Christoph Graupner on 8/20/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 public class SsmMdtUml2Dumper<S, E> extends SsmDumper<S, E> {
     private static final Logger  logger                         = LoggerFactory.getLogger(SsmMdtUml2Dumper.class);
     private              boolean fGuardGuessFromEnclosingMethod = true;

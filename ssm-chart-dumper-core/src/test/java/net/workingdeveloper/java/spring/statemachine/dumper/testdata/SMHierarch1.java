@@ -6,11 +6,6 @@ import org.springframework.statemachine.config.StateMachineBuilder;
 import org.springframework.statemachine.uml.UmlStateMachineModelFactory;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by Christoph Graupner on 8/17/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 @Service
 public class SMHierarch1 {
     public enum States {

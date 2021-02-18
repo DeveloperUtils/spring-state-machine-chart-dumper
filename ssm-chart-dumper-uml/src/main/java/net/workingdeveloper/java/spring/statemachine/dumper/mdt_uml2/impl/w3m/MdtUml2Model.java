@@ -13,11 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
-/**
- * Created by Christoph Graupner on 8/22/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 public class MdtUml2Model implements IMdtUml2Model {
     class MUAction extends MUNode<ModelUml.MXUNode> implements IMUAction {
 

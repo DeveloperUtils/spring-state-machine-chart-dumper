@@ -13,11 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Christoph Graupner on 8/22/16.
- *
- * @author Christoph Graupner <christoph.graupner@workingdeveloper.net>
- */
 class ModelUml extends ModelXmlBase {
     class MXUAction extends MXUNode {
 
