@@ -2,7 +2,7 @@ buildscript {
     ext {
         versions = [
             spring       : "5.3.+",
-            ssm          : "1.1+",
+            ssm          : "2.4.+",
             junit        : "5.7.+",
             junitPlatform: "1.7.+",
         ]
