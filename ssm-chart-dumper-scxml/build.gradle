@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(":ssm-chart-dumper-core")
+    testImplementation project(":ssm-chart-dumper-core").sourceSets.test.output
+}

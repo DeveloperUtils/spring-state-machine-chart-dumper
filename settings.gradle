@@ -1,0 +1,2 @@
+include "ssm-chart-dumper-core",
+        "ssm-chart-dumper-scxml"
